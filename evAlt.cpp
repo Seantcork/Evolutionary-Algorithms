@@ -29,46 +29,56 @@ class Individual{
 //probably need to talk about this data structure to make sure we are doing this right
 vector< vector<int> > readFile(string name){
 
-	cout << "here" << endl;
+	//Data structure used to keep track of the whole fike
 	vector< vector<int> > clauseFile;
+
+	//each individual clause
 	vector<int> clause;
 
 	ifstream input;
 	string line;
 
+	//open file and get rid of first line
 	input.open(name);
 	getline(input, line);
+
+	//check to see if the file is actually open
 	if(! input.is_open()){
 		cout << "errror opening file" << endl;
         return clauseFile;
 	}
-	
+
+	//while the file is still open.
 	while(getline(input, line)){
+
+		//split string by spaces
 		string delimiter = " ";
+
+		//position of delimeter
 		int position;
 		string number;
 
+		//while there is still space and we didnt not find anything
+		//this gets rid of the zero at the end of the clasues.
 		while ((position = line.find(delimiter)) != string::npos){
    			number = line.substr(0, position);
-
-   			cout << stoi(number) << " ";
-
-
+   			
+   			//push back variable into clause vector
    			clause.push_back(stoi(number));
+   			//move on to other variables in the line
     		line.erase(0, position + delimiter.length());
 		}
-		cout << endl;
-
-
-
-
+		
+		//push back clause into big vector
 		clauseFile.push_back(clause);
+
+		//be safe and clear vector
 		clause.clear();
 
 	}
 
+	//return completed vector
 	return clauseFile;
-
 
 }
 
