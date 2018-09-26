@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <stdint.h>
+#include <random>
 #include <string>
 #include <string.h>
 #include <vector>
@@ -18,6 +19,8 @@ class Individual{
 	public:
 		int fitness;
 		int calcFitness();
+		// feel free to rename later - KP
+		vector<int> negationArray;
 
 
 
@@ -64,9 +67,22 @@ vector< vector<int> > readFile(string name){
 
 }
 
-int Individual::calcFitness(){
+// Changed this from int to void -- let me know if you think this still needs to be an int.
+void Individual::calcFitness(vector<vector<int>> clauseFile){
 
-	//calc and return integer for fitness
+	for(int i = 0; i < clauseFile.size(); i++) {
+		for(int j = 0; j < clauseFile.at(i).size(); j++){
+			if(clauseFile.at(i).at(j) == 0)
+				break;
+
+			else if(clauseFile.at(i).at(j) * negationArray.at(clauseFile.at(i).at(j)-1) > 0) {
+				fitness++;
+				break;
+			}
+		}
+	}
+
+
 }
 //dont know whether we wanted to do this or not
 class Population{
@@ -99,9 +115,69 @@ void boltzman_selection(vector<Individual> Population){
 
 }
 
+void mutate(double mutProb, Individual individual) {
+	uniform_real_distribution<double> randDouble(0.0,1.0);
+   	default_random_engine randomEngine;
+
+	for(int i = 0; i < individual.negationArray.size(); i++){
+		// randDouble(randomEngine) returns a random double between 0 and 1
+		if( randDouble(randomEngine) <= mutProb ) 
+			individual.negationArray.at(i) = individual.negationArray.at(i) * -1;
+
+	}
+
+}
+// Takes in two parent inviduals and the crossover probability
+// Returns a pair of children.
+// Haven't tested this function as of yet. 
+pair<Individual, Individual> onePointCrossover(double crossProb, Individual firstParent, Individual secondParent) {
+
+	uniform_real_distribution<double> randDouble(0.0,1.0);
+   	default_random_engine randomEngine;
+
+   	Individual firstChild, secondChild;
+
+   	int crossoverPointIndex = 2 * ( rand() % ((firstParent.negationArray.size()-2)/2) ) + 1;
+
+   	cout << "crossoverPointIndex: " << crossoverPointIndex << endl;
+
+   	for(int i = 0; i < firstParent.negationArray.size(); i++) {
+   		if(i > crossoverPointIndex)
+   			firstChild.negationArray.push_back(secondParent.negationArray.at(i));
+   		else
+   			firstChild.negationArray.push_back(firstParent.negationArray.at(i));
+   	}
+
+   	for(int j = 0; j > 0; j++) {
+   		if(j < crossoverPointIndex)
+   			secondChild.negationArray.push_back(secondParent.negationArray.at(j));
+   		else
+   			secondChild.negationArray.push_back(firstParent.negationArray.at(j));
+   	}
+}
+
+Individual uniformCrossover(double crossProb, Individual firstParent, Individual secondParent) {
+
+	Individual child;
+	uniform_real_distribution<double> randDouble(0.0,1.0);
+   	default_random_engine randomEngine;
 
 
-int genetic_alg(string slection_type, int num_individuals, int cross_prop, int mut_prop, int num_gen){
+	for(int i = 0; i < firstParent.negationArray.size(); i++) {
+		if(randDouble(randomEngine) <= .5) {
+			child.negationArray.push_back(firstParent.negationArray.at(i));
+		}
+		else{
+			child.negationArray.push_back(secondParent.negationArray.at(i));
+		}
+	}
+
+	return child;
+
+}
+
+
+int genetic_alg(string slection_type, int num_individuals, double crossProb, double mutProb, int num_gen){
 	//have seperate functions for each selection type and run a vertain amount of times
 
 
@@ -109,13 +185,19 @@ int genetic_alg(string slection_type, int num_individuals, int cross_prop, int m
 }
 
 
-int pbil(int num_individuals, int pos_learning_rate, int neg_learning_rate, int mut_prop, int num_gen){
+int pbil(int num_individuals, int pos_learning_rate, int neg_learning_rate, double mutProb, int num_gen){
 
 	//do pbil with population from here
 }
 
 
 int main (int argc, char *argv[]) {
+
+	srand (time(NULL));
+	for(int i = 0; i < 50; i++ ){
+		cout << "crossoverPointIndex: " << 2 * ( rand() % ((20-2)/2) ) + 1 << endl;
+
+	}
 
 	vector<vector<int> > clauseFile;
 
@@ -128,8 +210,8 @@ int main (int argc, char *argv[]) {
 	string filename = argv[1];
 	// int num_individuals = atoi(argv[2]);
 	// string crossover = argv[3];
-	// int cross_prop = atoi(argv[4]);
-	// int mut_prop = atoi(argv[5]);
+	// double crossProb = atoi(argv[4]);
+	// double mutProb = atoi(argv[5]);
 	// int num_gen = atoi(argv[6]);
 	// string alg = argv[7];
 
