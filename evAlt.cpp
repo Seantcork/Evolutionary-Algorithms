@@ -8,10 +8,11 @@
 #include <string.h>
 #include <vector>
 #include <sstream>
+#include <random>
 using namespace std;
 
 
-
+int numberOfVariables;
 
 class Individual{
 
@@ -41,6 +42,23 @@ vector< vector<int> > readFile(string name){
 	//open file and get rid of first line
 	input.open(name);
 	getline(input, line);
+	cout << line << endl;
+	string delimiter = " ";
+	int position;
+	string number;
+	for(int i = 0; i < 3; i++){
+
+		position = line.find(delimiter);
+		if(position == string::npos){
+			cout << "error" << endl;
+		}
+
+		number = line.substr(0, position);
+
+		line.erase(0, position + delimiter.length());
+
+	}
+	numberOfVariables = stoi(number);
 
 	//check to see if the file is actually open
 	if(! input.is_open()){
@@ -144,6 +162,7 @@ void mutate(double mutProb, Individual individual) {
 	}
 
 }
+
 // Takes in two parent inviduals and the crossover probability
 // Returns a pair of children.
 // Haven't tested this function as of yet. 
@@ -201,20 +220,75 @@ int genetic_alg(string slection_type, int num_individuals, double crossProb, dou
 
 }
 
+//returns index of worst solution
+int findBestSolution(vector<double> probVector){
 
-int pbil(int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+}
 
-	//do pbil with population from here
+//returns index of best solution
+int finrWorstSolution(vector<double> probVector){
+
+
+}
+
+
+//generates a vector of bools for use in a pbil
+vector<int> generateSampleVector(vector<double> probVector, numberOfClauses){
+
+	std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+
+	vector<int> boolVector;
+
+	for(int i = 0; i < probVector.length; i ++){
+
+		//probability in the original probability vector
+		double probForVec = probVector[i];
+		
+		//probability for chosing true or false;
+		double probForUse = dis(gen);
+
+		//if the porbability is useful than its one
+		if(probForUse <= probVector){
+			boolVector[i] = 1
+		}
+
+		//if the probability is not than its zero
+		else{
+			boolVector[i] = 0;
+		}
+	}
+
+	return boolVector;
+}
+
+int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+	vector<double> probVector;
+
+	vector<Individual> population;
+	for(int i =0; i < numberOfVariables; i++){
+		probVector[i] = 0.5;
+	}
+
+	int generation = 0;
+	while(generation < numGen){
+		for(int i = 0; i < num_individuals; i ++){
+			population[i] = generate
+		}
+
+	}
+
 }
 
 
 int main (int argc, char *argv[]) {
 
-	srand (time(NULL));
-	for(int i = 0; i < 50; i++ ){
-		cout << "crossoverPointIndex: " << 2 * ( rand() % ((20-2)/2) ) + 1 << endl;
+	// srand (time(NULL));
+	// for(int i = 0; i < 50; i++ ){
+	// 	cout << "crossoverPointIndex: " << 2 * ( rand() % ((20-2)/2) ) + 1 << endl;
 
-	}
+	// }
 
 	vector<vector<int> > clauseFile;
 	string alg = string(argv[7]);
@@ -238,6 +312,7 @@ int main (int argc, char *argv[]) {
 	}
 
 	clauseFile = readFile(filename);
+	cout << numberOfVariables << endl;
 
 }
 
