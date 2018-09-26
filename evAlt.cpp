@@ -18,7 +18,7 @@ class Individual{
 	//are we creating a vector to hold the clauses
 	public:
 		int fitness;
-		int calcFitness();
+		void calcFitness(vector<vector<int> > clauseFile);
 		// feel free to rename later - KP
 		vector<int> negationArray;
 
@@ -51,10 +51,15 @@ vector< vector<int> > readFile(string name){
 		while ((position = line.find(delimiter)) != string::npos){
    			number = line.substr(0, position);
 
+   			cout << stoi(number) << " ";
+
+
    			clause.push_back(stoi(number));
-    		cout << stoi(number) << endl;
     		line.erase(0, position + delimiter.length());
 		}
+		cout << endl;
+
+
 
 
 		clauseFile.push_back(clause);
@@ -68,7 +73,7 @@ vector< vector<int> > readFile(string name){
 }
 
 // Changed this from int to void -- let me know if you think this still needs to be an int.
-void Individual::calcFitness(vector<vector<int>> clauseFile){
+void Individual::calcFitness(vector<vector<int> > clauseFile){
 
 	for(int i = 0; i < clauseFile.size(); i++) {
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
@@ -81,6 +86,8 @@ void Individual::calcFitness(vector<vector<int>> clauseFile){
 			}
 		}
 	}
+
+
 
 
 }
@@ -185,7 +192,7 @@ int genetic_alg(string slection_type, int num_individuals, double crossProb, dou
 }
 
 
-int pbil(int num_individuals, int pos_learning_rate, int neg_learning_rate, double mutProb, int num_gen){
+int pbil(int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
 
 	//do pbil with population from here
 }
@@ -200,24 +207,25 @@ int main (int argc, char *argv[]) {
 	}
 
 	vector<vector<int> > clauseFile;
-
-	//This is where we will also read in the file it just needs some work right now
-	//just wanted to give a little head start to the project
-
-
-
-	//Thinking about creating an if statement to determine if its ga or pbil.
+	string alg = string(argv[7]);
 	string filename = argv[1];
-	// int num_individuals = atoi(argv[2]);
-	// string crossover = argv[3];
-	// double crossProb = atoi(argv[4]);
-	// double mutProb = atoi(argv[5]);
-	// int num_gen = atoi(argv[6]);
-	// string alg = argv[7];
+	int num_individuals = atoi(argv[2]);
 
+	if(alg.compare("g") == 0){
+		string crossover = argv[3];
+		double crossProb = atoi(argv[4]);
+		double mutProb = atoi(argv[5]);
+		int num_gen = atoi(argv[6]);
 
-	//once we are done calculating we have to provide output to a file
-	//Also need to keep track of best output so far
+	}
+
+	if(alg.compare("p") == 0){
+		double posLearningRate = atoi(argv[3]);
+		double negLearningRate = atoi(argv[4]);
+		double mutProb = atoi(argv[5]);
+		int num_gen = atoi(argv[6]);
+
+	}
 
 	clauseFile = readFile(filename);
 
