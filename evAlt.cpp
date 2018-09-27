@@ -119,11 +119,7 @@ void Individual::calcFitness(vector<vector<int> > clauseFile){
 
 
 }
-//dont know whether we wanted to do this or not
-class Population{
 
-
-};
 
 //dont know what this will return yet
 void rank_selection(vector<Individual> Population){
@@ -297,6 +293,12 @@ int evaluate(vector<Individual> boolVector, int index){
 
 
 int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+
+	std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+	
+
 	vector<int> evaluations;
 	vector<double> probVector;
 
@@ -319,6 +321,27 @@ int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLe
 		vector<Individual> worstVector;
 		bestVector = findBestSolution(sampleVector, evaluations);
 		worstVector = findWorstSolution(sampleVector, evaluations);
+
+		for(int i = 0; i < probVector.length(); i++){
+			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i].boolVal * posLearningRate)
+
+		}
+
+		for(int i = 0; i < probVector.length){
+			if(bestVector[i].boolVal != worstVector[i].boolVal){
+				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i].boolVal * negLearningRate);
+			}
+		}
+
+		for(int i = 0; i < probVector.length){
+			double random = dis(gen);
+			if(random < mutProb){
+				random = dis(gen)
+				if(random > 0.5){
+					
+				}
+			}
+		}
 	}
 }
 
