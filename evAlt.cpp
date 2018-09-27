@@ -18,11 +18,11 @@ class Individual{
 
 	//are we creating a vector to hold the clauses
 	public:
+		bool boolVal;
 		int fitness;
 		void calcFitness(vector<vector<int> > clauseFile);
 		// feel free to rename later - KP
 		vector<int> negationArray;
-
 
 
 };
@@ -221,13 +221,37 @@ int genetic_alg(string slection_type, int num_individuals, double crossProb, dou
 }
 
 //returns index of worst solution
-int findBestSolution(vector<double> probVector){
+int findBestSolution(vector<vector<Individual> > sampleVector, vector<int> evaluations){
+
+	int bestFitness = 0;
+	int bestVectorIndex = 0;
+
+	for(int i = 0; i < sampleVector.length(); i++){
+		if(evaluations[i] > bestFitness){
+			bestFitness = evaluations[i];
+			bestVectorIndex = i
+		}
+	}
+
+	return sampleVector[bestVectorIndex];
 
 }
 
 //returns index of best solution
-int finrWorstSolution(vector<double> probVector){
+int findWorstSolution(vector<vector<Individual> > sampleVector, vector<int> evaluations){
 
+
+	int bestFitness = 8000;
+	int worstFitnessIndex = 0;
+
+	for(int i = 0; i < sampleVector.length(); i++){
+		if(evaluations[i] < bestFitness){
+			worstFitness = evaluations[i];
+			worstFitnessIndex = i
+		}
+	}
+
+	return sampleVector[bestVectorIndex];
 
 }
 
@@ -239,7 +263,7 @@ vector<int> generateSampleVector(vector<double> probVector, numberOfClauses){
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(0.0, 1.0);
 
-	vector<int> boolVector;
+	vector<Individual> boolVector;
 
 	for(int i = 0; i < probVector.length; i ++){
 
@@ -251,34 +275,51 @@ vector<int> generateSampleVector(vector<double> probVector, numberOfClauses){
 
 		//if the porbability is useful than its one
 		if(probForUse <= probVector){
-			boolVector[i] = 1
+			boolVector[i].boolVal = 1
 		}
 
 		//if the probability is not than its zero
 		else{
-			boolVector[i] = 0;
+			boolVector[i].boolVal = 0;
 		}
 	}
 
 	return boolVector;
 }
 
+
+int evaluate(vector<Individual> boolVector, int index){
+
+	boolVector[index].calcFitness()
+	return boolVector[index].fitness;
+
+}
+
+
 int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+	vector<int> evaluations;
 	vector<double> probVector;
 
-	vector<Individual> population;
+	vector<vector<Individual> > sampleVector;
+
+	//set normal probabilities
 	for(int i =0; i < numberOfVariables; i++){
 		probVector[i] = 0.5;
 	}
 
 	int generation = 0;
+	
 	while(generation < numGen){
 		for(int i = 0; i < num_individuals; i ++){
-			population[i] = generate
+			sampleVector[i] = generateSampleVector(probVector, numberOfClauses);
+			evaluations[i] = evaluate(sampleVector[i]);
 		}
 
+		vector<Individual> bestVector;
+		vector<Individual> worstVector;
+		bestVector = findBestSolution(sampleVector, evaluations);
+		worstVector = findWorstSolution(sampleVector, evaluations);
 	}
-
 }
 
 
