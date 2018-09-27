@@ -333,12 +333,18 @@ int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLe
 			}
 		}
 
+
+		int mutateDirection;
 		for(int i = 0; i < probVector.length){
 			double random = dis(gen);
 			if(random < mutProb){
 				random = dis(gen)
 				if(random > 0.5){
-					
+					mutateDirection = 1;
+				else{
+					mutateDirection = 0;
+				}
+				probVector[i] = probVector[i] * (1.0 - .05) + (mutateDirection * .05);
 				}
 			}
 		}
