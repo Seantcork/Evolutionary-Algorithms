@@ -322,7 +322,7 @@ int evaluate(vector<Individual> boolVector, int index, vector<vector<int> > clau
 }
 
 
-int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
 
 
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -343,9 +343,11 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 	int generation = 0;
 	
 	while(generation < numGen){
-		for(int i = 0; i < num_individuals; i ++){
+		for(int i = 0; i < numIndividuals; i ++){
 			sampleVector[i] = generateSampleVector(probVector, numberOfClauses);
-			evaluations[i] = evaluate(sampleVector[i]);
+
+			//pretty unsure about this at the moment
+			evaluations[i] = evaluate(sampleVector[i], i, clauseFile);
 		}
 
 		vector<Individual> bestVector;
@@ -354,11 +356,11 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 		worstVector = findWorstSolution(sampleVector, evaluations);
 
 		for(int i = 0; i < probVector.size(); i++){
-			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i].boolVal * posLearningRate)
+			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i].boolVal * posLearningRate);
 
 		}
 
-		for(int i = 0; i < probVector.size){
+		for(int i = 0; i < probVector.size(); i++){
 			if(bestVector[i].boolVal != worstVector[i].boolVal){
 				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i].boolVal * negLearningRate);
 			}
@@ -366,17 +368,17 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 
 
 		int mutateDirection;
-		for(int i = 0; i < probVector.size){
+		for(int i = 0; i < probVector.size(); i++){
 			double random = dis(gen);
 			if(random < mutProb){
-				random = dis(gen)
+				random = dis(gen);
 				if(random > 0.5){
 					mutateDirection = 1;
+				}
 				else{
 					mutateDirection = 0;
 				}
 				probVector[i] = probVector[i] * (1.0 - .05) + (mutateDirection * .05);
-				}
 			}
 		}
 	}
