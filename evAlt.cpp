@@ -118,8 +118,7 @@ void Individual::calcFitness(vector<vector<int> > clauseFile){
 }
 
 
-bool sortPopulation(const Individual & s1, const Individual & s2)
-{
+bool sortPopulation(const Individual & s1, const Individual & s2){
    return s1.fitness < s2.fitness;
 }
 
@@ -135,10 +134,12 @@ vector<Individual> rank_selection(vector<Individual> population, int numIndividu
 	std::uniform_int_distribution<int> gen(1, rankSum); // uniform, unbiased
 
 	for(int i = 0; i < numIndividuals; i++){
-		if(i == 0)
+		if(i == 0){
 			rankProbabilities.push_back(i + 1);
-		else
+		}
+		else {
 			rankProbabilities.push_back(i + 1 + rankProbabilities.at(i-1));
+		}
 	}
 
 
@@ -154,6 +155,8 @@ vector<Individual> rank_selection(vector<Individual> population, int numIndividu
 	}
 
 	return breedingPool;
+
+}
 
 
 void tournament_selection(vector<Individual> Population){
@@ -187,7 +190,7 @@ void mutate(double mutProb, Individual individual) {
 // Takes in two parent inviduals and the crossover probability
 // Returns a pair of children.
 // Haven't tested this function as of yet. 
-pair<Individual, Individual> onePointCrossover(double crossProb, Individual firstParent, Individual secondParent) {
+pair<Individual, Individual> onePointCrossover(double crossProb, Individual firstParent, Individual secondParent){
 
 	uniform_real_distribution<double> randDouble(0.0,1.0);
    	default_random_engine randomEngine;
@@ -280,7 +283,7 @@ vector<Individual> findWorstSolution(vector<vector<Individual> > sampleVector, v
 
 
 //generates a vector of bools for use in a pbil
-vector<int> generateSampleVector(vector<double> probVector, int numberOfClauses){
+vector<Individual> generateSampleVector(vector<double> probVector, int numberOfClauses){
 
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
@@ -298,7 +301,7 @@ vector<int> generateSampleVector(vector<double> probVector, int numberOfClauses)
 
 		//if the porbability is useful than its one
 		if(probForUse <= probVector[i]){
-			boolVector[i].boolVal = 1
+			boolVector[i].boolVal = 1;
 		}
 
 		//if the probability is not than its zero
@@ -311,15 +314,16 @@ vector<int> generateSampleVector(vector<double> probVector, int numberOfClauses)
 }
 
 
-int evaluate(vector<Individual> boolVector, int index){
+int evaluate(vector<Individual> boolVector, int index, vector<vector<int> > clauseFile){
 
-	boolVector[index].calcFitness()
+	boolVector[index].calcFitness(clauseFile);
 	return boolVector[index].fitness;
 
 }
 
 
-int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+
 
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
@@ -379,7 +383,7 @@ int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLe
 }
 
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[]){
 
 	// srand (time(NULL));
 	// for(int i = 0; i < 50; i++ ){
