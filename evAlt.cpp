@@ -121,14 +121,42 @@ void Individual::calcFitness(vector<vector<int> > clauseFile){
 }
 
 
-//dont know what this will return yet
-void rank_selection(vector<Individual> Population){
-
-	//manipulate population here or as a global.
-
-
-
+bool sortPopulation(const Individual & s1, const Individual & s2)
+{
+   return s1.fitness < s2.fitness;
 }
+
+vector<Individual> rank_selection(vector<Individual> population, int numIndividuals){
+
+	sort(population.begin(), population.end(), sortPopulation);
+	vector<int> rankProbabilities;
+	vector<Individual> breedingPool;
+	int rankSum = numIndividuals * (numIndividuals + 1) * 0.5;
+
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	std::uniform_int_distribution<int> gen(1, rankSum); // uniform, unbiased
+
+	for(int i = 0; i < numIndividuals; i++){
+		if(i == 0)
+			rankProbabilities.push_back(i + 1);
+		else
+			rankProbabilities.push_back(i + 1 + rankProbabilities.at(i-1));
+	}
+
+
+	for(int i = 0; i < numIndividuals; i++){
+		int rand = gen(engine);
+		cout << rand << endl;
+		for(int j = 0; j < numIndividuals; j++){
+			if(rand <= rankProbabilities.at(j)){
+				breedingPool.push_back(population.at(j));
+				break;
+			}
+		}
+	}
+
+	return breedingPool;
 
 
 void tournament_selection(vector<Individual> Population){
