@@ -97,9 +97,6 @@ void Individual::calcFitness(vector<vector<int> > clauseFile){
 		}
 	}
 
-
-
-
 }
 //dont know whether we wanted to do this or not
 class Population{
@@ -138,7 +135,7 @@ void mutate(double mutProb, Individual individual) {
 
 	for(int i = 0; i < individual.negationArray.size(); i++){
 		// randDouble(randomEngine) returns a random double between 0 and 1
-		if( randDouble(randomEngine) <= mutProb ) 
+		if( randDouble(randomEngine) < mutProb ) 
 			individual.negationArray.at(i) = individual.negationArray.at(i) * -1;
 
 	}
@@ -157,16 +154,18 @@ pair<Individual, Individual> onePointCrossover(double crossProb, Individual firs
    	int crossoverPointIndex = 2 * ( rand() % ((firstParent.negationArray.size()-2)/2) ) + 1;
 
    	cout << "crossoverPointIndex: " << crossoverPointIndex << endl;
-
+   	// Crossover for first child
    	for(int i = 0; i < firstParent.negationArray.size(); i++) {
-   		if(i > crossoverPointIndex)
+   		if(i >= crossoverPointIndex)
    			firstChild.negationArray.push_back(secondParent.negationArray.at(i));
    		else
    			firstChild.negationArray.push_back(firstParent.negationArray.at(i));
    	}
 
-   	for(int j = 0; j > 0; j++) {
-   		if(j < crossoverPointIndex)
+
+   	// Crossover for second child
+   	for(int j = 0; j < secondParent.negationArray.size(); j++) {
+   		if(j <= crossoverPointIndex)
    			secondChild.negationArray.push_back(secondParent.negationArray.at(j));
    		else
    			secondChild.negationArray.push_back(firstParent.negationArray.at(j));
