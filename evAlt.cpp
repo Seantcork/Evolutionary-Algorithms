@@ -8,20 +8,21 @@
 #include <string.h>
 #include <vector>
 #include <sstream>
+#include <random>
 using namespace std;
 
 
-
+int numberOfVariables;
 
 class Individual{
 
 	//are we creating a vector to hold the clauses
 	public:
+		bool boolVal;
 		int fitness;
 		void calcFitness(vector<vector<int> > clauseFile);
 		// feel free to rename later - KP
 		vector<int> negationArray;
-
 
 
 };
@@ -41,6 +42,23 @@ vector< vector<int> > readFile(string name){
 	//open file and get rid of first line
 	input.open(name);
 	getline(input, line);
+	cout << line << endl;
+	string delimiter = " ";
+	int position;
+	string number;
+	for(int i = 0; i < 3; i++){
+
+		position = line.find(delimiter);
+		if(position == string::npos){
+			cout << "error" << endl;
+		}
+
+		number = line.substr(0, position);
+
+		line.erase(0, position + delimiter.length());
+
+	}
+	numberOfVariables = stoi(number);
 
 	//check to see if the file is actually open
 	if(! input.is_open()){
@@ -98,11 +116,7 @@ void Individual::calcFitness(vector<vector<int> > clauseFile){
 	}
 
 }
-//dont know whether we wanted to do this or not
-class Population{
 
-
-};
 
 //dont know what this will return yet
 void rank_selection(vector<Individual> Population){
@@ -141,6 +155,7 @@ void mutate(double mutProb, Individual individual) {
 	}
 
 }
+
 // Takes in two parent inviduals and the crossover probability
 // Returns a pair of children.
 // Haven't tested this function as of yet. 
@@ -200,20 +215,149 @@ int genetic_alg(string slection_type, int num_individuals, double crossProb, dou
 
 }
 
+//returns index of worst solution
+vector<Individual> findBestSolution(vector<vector<Individual> > sampleVector, vector<int> evaluations){
 
-int pbil(int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+	int bestFitness = 0;
+	int bestVectorIndex = 0;
 
-	//do pbil with population from here
+	for(int i = 0; i < sampleVector.size(); i++){
+		if(evaluations[i] > bestFitness){
+			bestFitness = evaluations[i];
+			bestVectorIndex = i;
+		}
+	}
+
+	return sampleVector[bestVectorIndex];
+
+}
+
+//returns index of best solution
+vector<Individual> findWorstSolution(vector<vector<Individual> > sampleVector, vector<int> evaluations){
+
+
+	int worstFitness = 8000;
+	int worstFitnessIndex = 0;
+
+	for(int i = 0; i < sampleVector.size(); i++){
+		if(evaluations[i] < worstFitness){
+			worstFitness = evaluations[i];
+			worstFitnessIndex = i;
+		}
+	}
+
+	return sampleVector[worstFitnessIndex];
+
+}
+
+
+//generates a vector of bools for use in a pbil
+vector<int> generateSampleVector(vector<double> probVector, int numberOfClauses){
+
+	std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+
+	vector<Individual> boolVector;
+
+	for(int i = 0; i < probVector.size(); i ++){
+
+		//probability in the original probability vector
+		double probForVec = probVector[i];
+		
+		//probability for chosing true or false;
+		double probForUse = dis(gen);
+
+		//if the porbability is useful than its one
+		if(probForUse <= probVector[i]){
+			boolVector[i].boolVal = 1
+		}
+
+		//if the probability is not than its zero
+		else{
+			boolVector[i].boolVal = 0;
+		}
+	}
+
+	return boolVector;
+}
+
+
+int evaluate(vector<Individual> boolVector, int index){
+
+	boolVector[index].calcFitness()
+	return boolVector[index].fitness;
+
+}
+
+
+int pbil(int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRte, double mutProb, int numGen){
+
+	std::random_device rd;  //Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+	
+
+	vector<int> evaluations;
+	vector<double> probVector;
+
+	vector<vector<Individual> > sampleVector;
+
+	//set normal probabilities
+	for(int i =0; i < numberOfVariables; i++){
+		probVector[i] = 0.5;
+	}
+
+	int generation = 0;
+	
+	while(generation < numGen){
+		for(int i = 0; i < num_individuals; i ++){
+			sampleVector[i] = generateSampleVector(probVector, numberOfClauses);
+			evaluations[i] = evaluate(sampleVector[i]);
+		}
+
+		vector<Individual> bestVector;
+		vector<Individual> worstVector;
+		bestVector = findBestSolution(sampleVector, evaluations);
+		worstVector = findWorstSolution(sampleVector, evaluations);
+
+		for(int i = 0; i < probVector.size(); i++){
+			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i].boolVal * posLearningRate)
+
+		}
+
+		for(int i = 0; i < probVector.size){
+			if(bestVector[i].boolVal != worstVector[i].boolVal){
+				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i].boolVal * negLearningRate);
+			}
+		}
+
+
+		int mutateDirection;
+		for(int i = 0; i < probVector.size){
+			double random = dis(gen);
+			if(random < mutProb){
+				random = dis(gen)
+				if(random > 0.5){
+					mutateDirection = 1;
+				else{
+					mutateDirection = 0;
+				}
+				probVector[i] = probVector[i] * (1.0 - .05) + (mutateDirection * .05);
+				}
+			}
+		}
+	}
 }
 
 
 int main (int argc, char *argv[]) {
 
-	srand (time(NULL));
-	for(int i = 0; i < 50; i++ ){
-		cout << "crossoverPointIndex: " << 2 * ( rand() % ((20-2)/2) ) + 1 << endl;
+	// srand (time(NULL));
+	// for(int i = 0; i < 50; i++ ){
+	// 	cout << "crossoverPointIndex: " << 2 * ( rand() % ((20-2)/2) ) + 1 << endl;
 
-	}
+	// }
 
 	vector<vector<int> > clauseFile;
 	string alg = string(argv[7]);
@@ -237,6 +381,7 @@ int main (int argc, char *argv[]) {
 	}
 
 	clauseFile = readFile(filename);
+	
 
 }
 
