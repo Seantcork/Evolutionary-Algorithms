@@ -37,12 +37,17 @@ struct bestSolutionSoFar
 		
 	};
 
-/*
-	
-*/
 class Individual{
+	/*
+		Class to keep track of the individual in a population.
 
-	//are we creating a vector to hold the clauses
+		Attributes:
+			varAssignmentArray (vector<int>): A vector that stores whether each
+				variable is true (1) or false (-1) for that individual. This is
+				implemented as a negation array (using 1s and -1s instead of 0s).
+			fitness (int): The fitness of the individual after crossover/mutation.
+	*/
+
 	public:
 		vector<int> varAssignmentArray;
 		int fitness = 0;
@@ -50,12 +55,19 @@ class Individual{
 
 };
 
-// Changed this from int to void -- let me know if you think this still needs to be an int.
+/*
+	Function that evaluates the fitness of the individual. The fitness is determined
+	by the number of clauses that the individual has correct in the MAXSAT file. This
+	fitness will be calculated after selection/mutation occurs.
+*/
 void Individual::calcFitness(vector<vector<int>> clauseFile){
 
 	for(int i = 0; i < clauseFile.size(); i++) {
+
+		//checks all elements in a clause
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 
+			//if any element in the clause is true, then the clause is true
 			if(clauseFile.at(i).at(j) * this->varAssignmentArray.at(clauseFile.at(i).at(j)-1) > 0){
 				this->fitness++;
 				break;
@@ -146,21 +158,42 @@ vector< vector<int> > readFile(string name){
 
 }
 
+/*
+	Function that sorts two individuals in order of increasing fitness.
+*/
 bool sortPopulation(const Individual & s1, const Individual & s2){
    return s1.fitness < s2.fitness;
 }
 
+/*
+	Function that implements rank selection for the Genetic Algorithm. The population
+	is sorted by fitness and each individual is given a rank 1 - numIndividuals.
+	Probabilities for each individual are created based on these ranks. Then random
+	individuals are selected based on these probabilities until the new population reaches
+	size numIndividuals.
+*/
 vector<Individual> rankSelection(vector<Individual> population, int numIndividuals){
 
 	sort(population.begin(), population.end(), sortPopulation);
+
+	/*
+		This vector stores the probability each individual has. For example,
+		with 4 individuals the vector stores [1, 3, 6, 10] which means the first 
+		individual has probability 0 to 1 (10%), the second has 1 to 3 (20%), and
+		so on.
+	*/
 	vector<int> rankProbabilities;
 	vector<Individual> breedingPool;
+
+	//rank sum is the total of all ranks, needed to create probabilites from ranks
 	int rankSum = numIndividuals * (numIndividuals + 1) * 0.5;
 
 	std::random_device seeder;
 	std::mt19937 engine(seeder());
-	std::uniform_int_distribution<int> gen(1, rankSum); // uniform, unbiased
+	//the random individual must be between rank probability 1 and the maximum probability
+	std::uniform_int_distribution<int> gen(1, rankSum);
 
+	//this stores the rank probabilities in the probability vector
 	for(int i = 0; i < numIndividuals; i++){
 		if(i == 0){
 			rankProbabilities.push_back(i + 1);
@@ -170,10 +203,9 @@ vector<Individual> rankSelection(vector<Individual> population, int numIndividua
 		}
 	}
 
-
+	//random individuals are chosen based on probability, until new population is complete
 	for(int i = 0; i < numIndividuals; i++){
 		int rand = gen(engine);
-		cout << rand << endl;
 		for(int j = 0; j < numIndividuals; j++){
 			if(rand <= rankProbabilities.at(j)){
 				breedingPool.push_back(population.at(j));
