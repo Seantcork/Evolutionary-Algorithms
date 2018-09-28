@@ -381,7 +381,7 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 
 
 //returns index of worst solution
-vector<int> findBestSolution(vector<Individual> sampleVector, vector<int> evaluations){
+bestSolution findBestSolution(vector<Individual> sampleVector, vector<int> evaluations, bestSolution best){
 
 	int bestFitness = 0;
 	int bestVectorIndex = 0;
@@ -393,7 +393,8 @@ vector<int> findBestSolution(vector<Individual> sampleVector, vector<int> evalua
 		}
 	}
 
-	return sampleVector[bestVectorIndex].negationArray;
+	best.bestVector = sampleVector[bestVectorIndex].negationArray;
+	best.bestFitness = bestFitness;
 
 }
 
@@ -457,14 +458,35 @@ int evaluate(Individual indv, vector<vector<int> > clauseFile){
 int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
 
 
+	//helps us keep track of best individual so far
+	struct bestSolutionSoFar
+	{
+		vector<int> bestVector;
+		int bestFitness;
+		
+	};
+
+	//create struct to keep track of bestIndividual
+	bestSolutionSoFar bestIndividual;
+	
+
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(0.0, 1.0);
 	
-
+    //used to keep track of fitness for vectors
 	vector<int> evaluations;
+
+	//probability vector
 	vector<double> probVector;
 
+
+	//best vector we have found so far
+	vector<int> bestVectorSoFar;
+	//the fitness of best vector
+	int bestFitnessSoFar = 0;
+
+	//vector used for sample population
 	vector<Individual> sampleVector;
 
 	//set normal probabilities
@@ -472,9 +494,11 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 		probVector[i] = 0.5;
 	}
 
+	//generation nuymber
 	int generation = 0;
 	
 	while(generation < numGen){
+		
 		for(int i = 0; i < numIndividuals; i ++){
 			sampleVector[i] = *generateSampleVector(probVector, numberOfClauses);
 
@@ -484,14 +508,29 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 
 		vector<int> bestVector;
 		vector<int> worstVector;
-		bestVector = findBestSolution(sampleVector, evaluations);
+
+		//pass data into struct that keeps track of best solutions
+		bestIndividual = findBestSolution(sampleVector, evaluations, bestIndividual);
+
+		//gives us the best vector from this iteration
+		bestVector = bestIndividual.bestVector;
+
+		//keep track of best individual we have found
+		if(bestIndividual.fitness > bestFitnessSoFar){
+			bestFitnessSoFar = bestIndividual.fitness;
+			bestVectorSoFar = bestVector;
+		}
+
+		//keep track of worst vector for the increment
 		worstVector = findWorstSolution(sampleVector, evaluations);
 
+		//generate positive learning rate 
 		for(int i = 0; i < probVector.size(); i++){
 			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i] * posLearningRate);
 
 		}
 
+		//generate nefatice learning rate
 		for(int i = 0; i < probVector.size(); i++){
 			if(bestVector[i] != worstVector[i]){
 				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i] * negLearningRate);
@@ -499,20 +538,34 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 		}
 
 
+		//mutation during pnil
 		int mutateDirection;
 		for(int i = 0; i < probVector.size(); i++){
+
+			//gen random
 			double random = dis(gen);
+
+			//if random is less than mutprob
 			if(random < mutProb){
 				random = dis(gen);
+
+				//following pseudocode
 				if(random > 0.5){
 					mutateDirection = 1;
 				}
 				else{
 					mutateDirection = 0;
 				}
+				//mutation
 				probVector[i] = probVector[i] * (1.0 - .05) + (mutateDirection * .05);
 			}
 		}
+
+
+		//just in case
+		sampleVector.clear();
+		//increase generation
+		generation++;
 	}
 }
 
