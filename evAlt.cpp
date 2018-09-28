@@ -156,7 +156,7 @@ vector<Individual> rankSelection(vector<Individual> population, int numIndividua
 }
 
 
-void tournamentSelection(vector<Individual> Population){
+vector<Individual> tournamentSelection(vector<Individual> Population, int numIndividuals){
 
 	//manipulate population here or as a global.
 	
@@ -165,11 +165,21 @@ void tournamentSelection(vector<Individual> Population){
 }
 
 
-void boltzmanSelection(vector<Individual> Population){
+vector<Individual> boltzmanSelection(vector<Individual> Population, int numIndividuals){
 
 
 
 }
+
+vector<Individual> runSelection(string selectionType, vector<Individual> population, int numIndividuals) {
+	if(selectionType == "rs")
+		return rankSelection(population, numIndividuals);
+	else if(selectionType == "ts")
+		return tournamentSelection(population, numIndividuals);
+	else if (selectionType == "bs")
+		return boltzmanSelection(population, numIndividuals);
+}
+
 
 vector<Individual> mutatePopulation(double mutProb, vector<Individual> population) {
 	uniform_real_distribution<double> randDouble(0.0,1.0);
@@ -232,7 +242,7 @@ vector<Individual> uniformCrossover(double crossProb, vector<Individual> populat
 	Individual firstChild, secondChild, firstParent, secondParent;
 	uniform_real_distribution<double> randDouble(0.0,1.0);
    	default_random_engine randomEngine;
-   	vector<Individual> returnPopulation
+   	vector<Individual> returnPopulation;
 
    	for(int i = 0; i < population.size(); i++ ){
    		firstParent = population.at(i);
@@ -265,6 +275,21 @@ vector<Individual> uniformCrossover(double crossProb, vector<Individual> populat
 	return returnPopulation;
 }
 
+vector<Individual> runCrossover(string crossoverType, int crossProb, vector<Individual> population ){
+	uniform_real_distribution<double> randDouble(0.0,1.0);
+   	default_random_engine randomEngine;
+   	if(crossProb <= randDouble(randomEngine)){
+   		if(crossoverType == "1c") 
+			return onePointCrossover(crossProb, population);
+		else if(crossoverType == "uc")
+			return uniformCrossover(crossProb, population);
+	}
+	else
+		return population;
+	
+	
+}
+
 
 int genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
 	vector<Individual> population;
@@ -284,29 +309,7 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 
 }
 
-vector<Individual> runSelection(string selectionType, vector<Individual> population, int numIndividuals) {
-	if(selectionType == "rs")
-		return rankSelection(population, numIndividuals);
-	else if(selectionType == "ts")
-		return tournamentSelection(population, numIndividuals);
-	else if (selectionType == "bs")
-		return boltzmanSelection(population, numIndividuals);
-}
 
-vector<Individual> runCrossover(string crossoverType, int crossProb, vector<Individual> population ){
-	uniform_real_distribution<double> randDouble(0.0,1.0);
-   	default_random_engine randomEngine;
-   	if(crossProb <= randDouble(randomEngine))
-   		if(crossoverType == "1c") {
-			return onePointCrossover(crossProb, population);
-		else if(crossoverType == "uc")
-			return uniformCrossover(crossProb, population);
-	else
-		return population;
-	
-	}
-
-}
 
 //returns index of worst solution
 vector<int> findBestSolution(vector<Individual> sampleVector, vector<int> evaluations){
