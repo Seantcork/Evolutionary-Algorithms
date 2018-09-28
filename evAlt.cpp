@@ -244,7 +244,7 @@ int genetic_alg(string slection_type, int num_individuals, double crossProb, dou
 }
 
 //returns index of worst solution
-vector<Individual> findBestSolution(vector<vector<Individual> > sampleVector, vector<int> evaluations){
+vector<int> findBestSolution(vector<Individual> sampleVector, vector<int> evaluations){
 
 	int bestFitness = 0;
 	int bestVectorIndex = 0;
@@ -261,7 +261,7 @@ vector<Individual> findBestSolution(vector<vector<Individual> > sampleVector, ve
 }
 
 //returns index of best solution
-vector<Individual> findWorstSolution(vector<vector<Individual> > sampleVector, vector<int> evaluations){
+vector<int> findWorstSolution(vector<Individual> sampleVector, vector<int> evaluations){
 
 
 	int worstFitness = 8000;
@@ -280,15 +280,14 @@ vector<Individual> findWorstSolution(vector<vector<Individual> > sampleVector, v
 
 
 //generates a vector of bools for use in a pbil
-vector<Individual> generateSampleVector(vector<double> probVector, int numberOfClauses){
+Individual* generateSampleVector(vector<double> probVector, int numberOfClauses){
 
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(0.0, 1.0);
 
-    Individual indv = new Individual;
+    Individual *indv = new Individual;
 
-	indv.negationArray = new vetor<int>;
 
 	for(int i = 0; i < probVector.size(); i ++){
 
@@ -297,12 +296,12 @@ vector<Individual> generateSampleVector(vector<double> probVector, int numberOfC
 
 		//if the porbability is useful than its one
 		if(probForUse <= probVector[i]){
-			indv.negationArray[i] = 1;
+			indv->negationArray[i] = 1;
 		}
 
 		//if the probability is not than its zero
 		else{
-			indv.negationArray[i] = 0;
+			indv->negationArray[i] = 0;
 		}
 	}
 
@@ -340,14 +339,14 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 	
 	while(generation < numGen){
 		for(int i = 0; i < numIndividuals; i ++){
-			sampleVector[i] = generateSampleVector(probVector, numberOfClauses);
+			sampleVector[i] = *generateSampleVector(probVector, numberOfClauses);
 
 			//pretty unsure about this at the moment
-			evaluations[i] = evaluate(sampleVector[i], i, clauseFile);
+			evaluations[i] = evaluate(sampleVector[i], clauseFile);
 		}
 
-		vector<Individual> bestVector;
-		vector<Individual> worstVector;
+		vector<int> bestVector;
+		vector<int> worstVector;
 		bestVector = findBestSolution(sampleVector, evaluations);
 		worstVector = findWorstSolution(sampleVector, evaluations);
 
@@ -357,7 +356,7 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 		}
 
 		for(int i = 0; i < probVector.size(); i++){
-			if(bestVector[i] != worstVector[i].boolVal){
+			if(bestVector[i] != worstVector[i]){
 				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i] * negLearningRate);
 			}
 		}
