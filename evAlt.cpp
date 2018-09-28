@@ -13,8 +13,19 @@
 #include <math.h>
 using namespace std;
 
+const string GENETIC_ALGORITHM = "g";
+const string PBIL = "p";
+
+const string RANK_SELECTION = "rs";
+const string TOURNAMENT_SELECTION = "ts";
 const int TOURNAMENT_SELECTION_M = 2;
 const int TOURNAMENT_SELECTION_K = 1;
+const string BOLTZMANN_SELECTION = "bs";
+
+const string ONE_POINT_CROSSOVER = "1c"
+const string UNIFORM_CROSSOVER = "uc";
+
+
 
 struct bestSolutionSoFar
 	{
@@ -401,18 +412,18 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 		}
 
 		//does selection based on user input
-		if(selectionType == "rs")
+		if(selectionType.compare(RANK_SELECTION) == 0)
 			population = rankSelection(population, numIndividuals);
-		else if(selectionType == "ts")
+		else if(selectionType.compare(TOURNAMENT_SELECTION) == 0)
 			population = tournamentSelection(population, numIndividuals);
-		else if (selectionType == "bs")
+		else if (selectionType.compare(BOLTZMANN_SELECTION) == 0)
 			population = boltzmannSelection(population, numIndividuals);
 
 
 		//does crossover based on user input
-		if(crossoverType == "1c") 
+		if(crossoverType.compare(ONE_POINT_CROSSOVER) == 0) 
 			population = onePointCrossover(population, crossProb, numIndividuals);
-		else if(crossoverType == "uc")
+		else if(crossoverType.compare(UNIFORM_CROSSOVER) == 0)
 			population = uniformCrossover(population, crossProb, numIndividuals);
 
 		population = mutatePopulation(population, mutProb, numIndividuals);
@@ -621,7 +632,7 @@ int main(int argc, char *argv[]){
 	string filename = argv[1];
 	int numIndividuals = atoi(argv[2]);
 
-	if(alg.compare("g") == 0){
+	if(alg.compare(GENETIC_ALGORITHM) == 0){
 		string selectionType = argv[3];
 		string crossoverType = argv[4];
 		double crossProb = atoi(argv[5]);
@@ -632,7 +643,7 @@ int main(int argc, char *argv[]){
 
 	}
 
-	if(alg.compare("p") == 0){
+	if(alg.compare(PBIL) == 0){
 		double posLearningRate = atoi(argv[3]);
 		double negLearningRate = atoi(argv[4]);
 		double mutProb = atoi(argv[5]);
