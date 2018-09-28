@@ -232,23 +232,6 @@ vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndi
 
 }
 
-
-vector<Individual> mutatePopulation(vector<Individual> population, double mutProb, int numIndividuals) {
-	std::random_device seeder;
-	std::mt19937 engine(seeder());
-	std::uniform_real_distribution<double> gen(0.0, 1.0);
-
-   	for(int i = 0; i < numIndividuals; i++){
-   		for(int j = 0; j < numberOfVariables; j++){
-			if(gen(engine) < mutProb) 
-				population.at(i).varAssignmentArray.at(j) *= -1;
-		}
-   	}
-
-   	return population;	
-
-}
-
 // Takes in two parent inviduals and the crossover probability
 // Returns a pair of children.
 // Haven't tested this function as of yet. 
@@ -359,6 +342,22 @@ vector<Individual> uniformCrossover(vector<Individual> population, double crossP
 	return newPopulation;
 }
 
+
+vector<Individual> mutatePopulation(vector<Individual> population, double mutProb, int numIndividuals) {
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	std::uniform_real_distribution<double> gen(0.0, 1.0);
+
+   	for(int i = 0; i < numIndividuals; i++){
+   		for(int j = 0; j < numberOfVariables; j++){
+			if(gen(engine) < mutProb) 
+				population.at(i).varAssignmentArray.at(j) *= -1;
+		}
+   	}
+
+   	return population;	
+
+}
 
 int genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
 	vector<Individual> population;
