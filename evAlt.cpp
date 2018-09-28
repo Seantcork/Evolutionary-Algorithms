@@ -16,7 +16,16 @@ using namespace std;
 const int TOURNAMENT_SELECTION_M = 2;
 const int TOURNAMENT_SELECTION_K = 1;
 
+struct bestSolutionSoFar
+	{
+		vector<int> bestVector;
+		int bestFitness;
+		int iteration;
+		
+	};
+
 int numberOfVariables;
+int numberOfClauses;
 
 class Individual{
 
@@ -58,11 +67,10 @@ vector< vector<int> > readFile(string name){
 	//open file and get rid of first line
 	input.open(name);
 	getline(input, line);
-	cout << line << endl;
 	string delimiter = " ";
 	int position;
 	string number;
-	for(int i = 0; i < 3; i++){
+	for(int i = 0; i < 2; i++){
 
 		position = line.find(delimiter);
 		if(position == string::npos){
@@ -74,6 +82,15 @@ vector< vector<int> > readFile(string name){
 		line.erase(0, position + delimiter.length());
 
 	}
+	numberOfClauses = stoi(number);
+
+	position = line.find(delimiter);
+	if(position == string::npos){
+		cout << "error" << endl;
+	}
+	number = line.substr(0, position);
+
+	line.erase(0, position + delimiter.length());
 	numberOfVariables = stoi(number);
 
 	//check to see if the file is actually open
@@ -473,7 +490,7 @@ Individual* generateSampleVector(vector<double> probVector, int numberOfClauses)
 	return indv;
 }
 
-
+//evaluation of fitness
 int evaluate(Individual indv, vector<vector<int> > clauseFile){
 
 	indv.calcFitness(clauseFile);
@@ -486,12 +503,6 @@ bestSolutionSoFar pbil(vector<vector<int> > clauseFile, int numberOfClauses, int
 
 
 	//helps us keep track of best individual so far
-	struct bestSolutionSoFar
-	{
-		vector<int> bestVector;
-		int bestFitness;
-		
-	};
 
 	//create struct to keep track of bestIndividual
 	bestSolutionSoFar bestIndividual;
@@ -564,7 +575,6 @@ bestSolutionSoFar pbil(vector<vector<int> > clauseFile, int numberOfClauses, int
 			}
 		}
 
-
 		//mutation during pnil
 		int mutateDirection;
 		for(int i = 0; i < probVector.size(); i++){
@@ -587,14 +597,13 @@ bestSolutionSoFar pbil(vector<vector<int> > clauseFile, int numberOfClauses, int
 				probVector[i] = probVector[i] * (1.0 - .05) + (mutateDirection * .05);
 			}
 		}
-
 		//just in case
 		sampleVector.clear();
 		//increase generation
 		generation++;
 	}
 
-	return bestSolutionSoFar;
+	return bestIndividualt;
 }
 
 
@@ -606,6 +615,7 @@ int main(int argc, char *argv[]){
 
 	// }
 
+	bestSolutionSoFar result;
 	vector<vector<int> > clauseFile;
 	string alg = string(argv[7]);
 	string filename = argv[1];
@@ -618,6 +628,8 @@ int main(int argc, char *argv[]){
 		double mutProb = atoi(argv[6]);
 		int numGen = atoi(argv[7]);
 
+		result = genetic_alg();
+
 	}
 
 	if(alg.compare("p") == 0){
@@ -626,9 +638,18 @@ int main(int argc, char *argv[]){
 		double mutProb = atoi(argv[5]);
 		int numGen = atoi(argv[6]);
 
+		result = pbil();
+
 	}
 
 	clauseFile = readFile(filename);
+
+	cout << filename << endl;
+	cout << numVariables << endl;
+	cout << numberOfClauses << endl;
+	cout << (result.bestFitness/numVariables) * 100 << "% " << endl;
+	printBestVector(result.bestVector);
+	cout << result.iteration << endl;
 	
 
 }
