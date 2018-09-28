@@ -455,7 +455,7 @@ int evaluate(Individual indv, vector<vector<int> > clauseFile){
 }
 
 
-int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
+bestSolutionSoFar pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
 
 
 	//helps us keep track of best individual so far
@@ -478,7 +478,7 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 	vector<int> evaluations;
 
 	//probability vector
-	vector<double> probVector;
+	vector<double> probVector(numberOfVariables -1);
 
 
 	//best vector we have found so far
@@ -490,7 +490,7 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 	vector<Individual> sampleVector;
 
 	//set normal probabilities
-	for(int i =0; i < numberOfVariables; i++){
+	for(int i = 0; i < numberOfVariables; i++){
 		probVector[i] = 0.5;
 	}
 
@@ -500,10 +500,10 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 	while(generation < numGen){
 		
 		for(int i = 0; i < numIndividuals; i ++){
-			sampleVector[i] = *generateSampleVector(probVector, numberOfClauses);
+			sampleVector.push_back(*generateSampleVector(probVector, numberOfClauses));
 
 			//pretty unsure about this at the moment
-			evaluations[i] = evaluate(sampleVector[i], clauseFile);
+			evaluations.push_back(evaluate(sampleVector[i], clauseFile));
 		}
 
 		vector<int> bestVector;
@@ -561,12 +561,13 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 			}
 		}
 
-
 		//just in case
 		sampleVector.clear();
 		//increase generation
 		generation++;
 	}
+
+	return bestSolutionSoFar;
 }
 
 
