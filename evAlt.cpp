@@ -106,7 +106,7 @@ void Individual::calcFitness(vector<vector<int> > clauseFile){
 	for(int i = 0; i < clauseFile.size(); i++) {
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 			if(clauseFile.at(i).at(j) * this->negationArray.at(clauseFile.at(i).at(j)-1) > 0) {
-				fitness++;
+				this->fitness++;
 				break;
 			}
 		}
@@ -256,7 +256,7 @@ vector<Individual> findBestSolution(vector<vector<Individual> > sampleVector, ve
 		}
 	}
 
-	return sampleVector[bestVectorIndex];
+	return sampleVector[bestVectorIndex].negationArray;
 
 }
 
@@ -274,7 +274,7 @@ vector<Individual> findWorstSolution(vector<vector<Individual> > sampleVector, v
 		}
 	}
 
-	return sampleVector[worstFitnessIndex];
+	return sampleVector[worstFitnessIndex].negationArray;
 
 }
 
@@ -286,35 +286,34 @@ vector<Individual> generateSampleVector(vector<double> probVector, int numberOfC
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(0.0, 1.0);
 
-	vector<Individual> boolVector;
+    Individual indv = new Individual;
+
+	indv.negationArray = new vetor<int>;
 
 	for(int i = 0; i < probVector.size(); i ++){
 
-		//probability in the original probability vector
-		double probForVec = probVector[i];
-		
 		//probability for chosing true or false;
 		double probForUse = dis(gen);
 
 		//if the porbability is useful than its one
 		if(probForUse <= probVector[i]){
-			boolVector[i].boolVal = 1;
+			indv.negationArray[i] = 1;
 		}
 
 		//if the probability is not than its zero
 		else{
-			boolVector[i].boolVal = 0;
+			indv.negationArray[i] = 0;
 		}
 	}
 
-	return boolVector;
+	return indv;
 }
 
 
-int evaluate(vector<Individual> boolVector, int index, vector<vector<int> > clauseFile){
+int evaluate(Individual indv, vector<vector<int> > clauseFile){
 
-	boolVector[index].calcFitness(clauseFile);
-	return boolVector[index].fitness;
+	indv.calcFitness(clauseFile);
+	return indv.fitness;
 
 }
 
@@ -330,7 +329,7 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 	vector<int> evaluations;
 	vector<double> probVector;
 
-	vector<vector<Individual> > sampleVector;
+	vector<Individual> sampleVector;
 
 	//set normal probabilities
 	for(int i =0; i < numberOfVariables; i++){
@@ -353,13 +352,13 @@ int pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividual
 		worstVector = findWorstSolution(sampleVector, evaluations);
 
 		for(int i = 0; i < probVector.size(); i++){
-			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i].boolVal * posLearningRate);
+			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i] * posLearningRate);
 
 		}
 
 		for(int i = 0; i < probVector.size(); i++){
-			if(bestVector[i].boolVal != worstVector[i].boolVal){
-				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i].boolVal * negLearningRate);
+			if(bestVector[i] != worstVector[i].boolVal){
+				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i] * negLearningRate);
 			}
 		}
 
