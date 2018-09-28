@@ -19,7 +19,7 @@ class Individual{
 	//are we creating a vector to hold the clauses
 	public:
 		bool boolVal;
-		int fitness;
+		int fitness = 0;
 		void calcFitness(vector<vector<int> > clauseFile);
 		// feel free to rename later - KP
 		vector<int> negationArray;
@@ -119,7 +119,7 @@ bool sortPopulation(const Individual & s1, const Individual & s2){
    return s1.fitness < s2.fitness;
 }
 
-vector<Individual> rank_selection(vector<Individual> population, int numIndividuals){
+vector<Individual> rankSelection(vector<Individual> population, int numIndividuals){
 
 	sort(population.begin(), population.end(), sortPopulation);
 	vector<int> rankProbabilities;
@@ -156,7 +156,7 @@ vector<Individual> rank_selection(vector<Individual> population, int numIndividu
 }
 
 
-void tournament_selection(vector<Individual> Population){
+void tournamentSelection(vector<Individual> Population){
 
 	//manipulate population here or as a global.
 	
@@ -165,81 +165,146 @@ void tournament_selection(vector<Individual> Population){
 }
 
 
-void boltzman_selection(vector<Individual> Population){
+void boltzmanSelection(vector<Individual> Population){
 
 
 
 }
 
-void mutate(double mutProb, Individual individual) {
+vector<Individual> mutatePopulation(double mutProb, vector<Individual> population) {
 	uniform_real_distribution<double> randDouble(0.0,1.0);
    	default_random_engine randomEngine;
-
-	for(int i = 0; i < individual.negationArray.size(); i++){
+   	for(int j = 0; j < population.size(); j++){
+   		for(int i = 0; i < population.at(i).negationArray.size(); i++){
 		// randDouble(randomEngine) returns a random double between 0 and 1
-		if( randDouble(randomEngine) < mutProb ) 
-			individual.negationArray.at(i) = individual.negationArray.at(i) * -1;
+			if( randDouble(randomEngine) < mutProb ) 
+				population.at(i).negationArray.at(i) = population.at(i).negationArray.at(i) * -1;
+		}
+   	}
 
-	}
+   	return population;	
 
 }
 
 // Takes in two parent inviduals and the crossover probability
 // Returns a pair of children.
 // Haven't tested this function as of yet. 
-pair<Individual, Individual> onePointCrossover(double crossProb, Individual firstParent, Individual secondParent){
+vector<Individual> onePointCrossover(double crossProb, vector<Individual> population){
 
 	uniform_real_distribution<double> randDouble(0.0,1.0);
    	default_random_engine randomEngine;
+   	Individual firstChild, secondChild, firstParent, secondParent;
+   	vector<Individual> returnPopulation;
 
-   	Individual firstChild, secondChild;
 
-   	int crossoverPointIndex = 2 * ( rand() % ((firstParent.negationArray.size()-2)/2) ) + 1;
+   	for(int i = 0; i < population.size(); i += 2) {
+   		int crossoverPointIndex = 2 * ( rand() % ((firstParent.negationArray.size()-2)/2) ) + 1;
 
-   	cout << "crossoverPointIndex: " << crossoverPointIndex << endl;
-   	// Crossover for first child
-   	for(int i = 0; i < firstParent.negationArray.size(); i++) {
-   		if(i >= crossoverPointIndex)
-   			firstChild.negationArray.push_back(secondParent.negationArray.at(i));
-   		else
-   			firstChild.negationArray.push_back(firstParent.negationArray.at(i));
+   		// Crossover for first child
+   		for(int i = 0; i < firstParent.negationArray.size(); i++) {
+   			if(i >= crossoverPointIndex)
+   				firstChild.negationArray.push_back(secondParent.negationArray.at(i));
+   			else
+   				firstChild.negationArray.push_back(firstParent.negationArray.at(i));
+   		}
+
+   		// Crossover for second child
+   		for(int j = 0; j < secondParent.negationArray.size(); j++) {
+   			if(j <= crossoverPointIndex)
+   				secondChild.negationArray.push_back(secondParent.negationArray.at(j));
+   			else
+   				secondChild.negationArray.push_back(firstParent.negationArray.at(j));
+   		}
+   		// Add children to return population and clear them for the next set of crossover
+   		returnPopulation.push_back(firstChild);
+   		returnPopulation.push_back(secondChild);
+   		firstChild.negationArray.clear();
+   		secondChild.negationArray.clear();
    	}
 
+   	return returnPopulation;
 
-   	// Crossover for second child
-   	for(int j = 0; j < secondParent.negationArray.size(); j++) {
-   		if(j <= crossoverPointIndex)
-   			secondChild.negationArray.push_back(secondParent.negationArray.at(j));
-   		else
-   			secondChild.negationArray.push_back(firstParent.negationArray.at(j));
-   	}
+   	
 }
 
-Individual uniformCrossover(double crossProb, Individual firstParent, Individual secondParent) {
+vector<Individual> uniformCrossover(double crossProb, vector<Individual> population) {
 
-	Individual child;
+	Individual firstChild, secondChild, firstParent, secondParent;
 	uniform_real_distribution<double> randDouble(0.0,1.0);
    	default_random_engine randomEngine;
+   	vector<Individual> returnPopulation
+
+   	for(int i = 0; i < population.size(); i++ ){
+   		firstParent = population.at(i);
+   		secondParent = population.at(i+1);
+
+   		for(int i = 0; i < firstParent.negationArray.size(); i++) {
+			if(randDouble(randomEngine) <= .5) {
+				firstChild.negationArray.push_back(firstParent.negationArray.at(i));
+			}
+			else {
+				firstChild.negationArray.push_back(secondParent.negationArray.at(i));
+			}
+		}
+
+		for(int i = 0; i < firstParent.negationArray.size(); i++) {
+			if(randDouble(randomEngine) <= .5) {
+				secondChild.negationArray.push_back(firstParent.negationArray.at(i));
+			}
+			else {
+				secondChild.negationArray.push_back(secondParent.negationArray.at(i));
+			}
+
+		}
+		returnPopulation.push_back(firstChild);
+		returnPopulation.push_back(secondChild);
+		firstChild.negationArray.clear();
+		secondChild.negationArray.clear();
+   	}
+
+	return returnPopulation;
+}
 
 
-	for(int i = 0; i < firstParent.negationArray.size(); i++) {
-		if(randDouble(randomEngine) <= .5) {
-			child.negationArray.push_back(firstParent.negationArray.at(i));
-		}
-		else{
-			child.negationArray.push_back(secondParent.negationArray.at(i));
-		}
+int genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
+	vector<Individual> population;
+	// Initialize population here
+	int genCount = 0;
+
+	//have seperate functions for each selection type and run a vertain amount of times
+	while(genCount != numGen || population.at(0).fitness != numberOfClauses) {
+		population = runSelection(selectionType, population, numIndividuals);
+
+		population = runCrossover(crossoverType, crossProb, population);
+
+		population = mutatePopulation(mutProb, population);
+
+		genCount++;
 	}
 
-	return child;
-
 }
 
+vector<Individual> runSelection(string selectionType, vector<Individual> population, int numIndividuals) {
+	if(selectionType == "rs")
+		return rankSelection(population, numIndividuals);
+	else if(selectionType == "ts")
+		return tournamentSelection(population, numIndividuals);
+	else if (selectionType == "bs")
+		return boltzmanSelection(population, numIndividuals);
+}
 
-int genetic_alg(string slection_type, int num_individuals, double crossProb, double mutProb, int num_gen){
-	//have seperate functions for each selection type and run a vertain amount of times
-
-
+vector<Individual> runCrossover(string crossoverType, int crossProb, vector<Individual> population ){
+	uniform_real_distribution<double> randDouble(0.0,1.0);
+   	default_random_engine randomEngine;
+   	if(crossProb <= randDouble(randomEngine))
+   		if(crossoverType == "1c") {
+			return onePointCrossover(crossProb, population);
+		else if(crossoverType == "uc")
+			return uniformCrossover(crossProb, population);
+	else
+		return population;
+	
+	}
 
 }
 
@@ -393,13 +458,14 @@ int main(int argc, char *argv[]){
 	vector<vector<int> > clauseFile;
 	string alg = string(argv[7]);
 	string filename = argv[1];
-	int num_individuals = atoi(argv[2]);
+	int numIndividuals = atoi(argv[2]);
 
 	if(alg.compare("g") == 0){
-		string crossover = argv[3];
-		double crossProb = atoi(argv[4]);
-		double mutProb = atoi(argv[5]);
-		int num_gen = atoi(argv[6]);
+		string selectionType = argv[3];
+		string crossoverType = argv[4];
+		double crossProb = atoi(argv[5]);
+		double mutProb = atoi(argv[6]);
+		int numGen = atoi(argv[7]);
 
 	}
 
@@ -407,7 +473,7 @@ int main(int argc, char *argv[]){
 		double posLearningRate = atoi(argv[3]);
 		double negLearningRate = atoi(argv[4]);
 		double mutProb = atoi(argv[5]);
-		int num_gen = atoi(argv[6]);
+		int numGen = atoi(argv[6]);
 
 	}
 
