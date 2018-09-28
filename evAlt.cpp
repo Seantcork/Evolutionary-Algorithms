@@ -393,7 +393,7 @@ bestSolution findBestSolution(vector<Individual> sampleVector, vector<int> evalu
 		}
 	}
 
-	best.bestVector = sampleVector[bestVectorIndex].negationArray;
+	best.bestVector = sampleVector[bestVectorIndex].varAssignmentArray;
 	best.bestFitness = bestFitness;
 
 }
@@ -412,7 +412,7 @@ vector<int> findWorstSolution(vector<Individual> sampleVector, vector<int> evalu
 		}
 	}
 
-	return sampleVector[worstFitnessIndex].negationArray;
+	return sampleVector[worstFitnessIndex].varAssignmentArray;
 
 }
 
@@ -434,12 +434,12 @@ Individual* generateSampleVector(vector<double> probVector, int numberOfClauses)
 
 		//if the porbability is useful than its one
 		if(probForUse <= probVector[i]){
-			indv->negationArray[i] = 1;
+			indv->varAssignmentArray[i] = 1;
 		}
 
 		//if the probability is not than its zero
 		else{
-			indv->negationArray[i] = 0;
+			indv->varAssignmentArray[i] = 0;
 		}
 	}
 
