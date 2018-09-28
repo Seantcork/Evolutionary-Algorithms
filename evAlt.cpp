@@ -223,24 +223,16 @@ vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndi
 
 }
 
-vector<Individual> runSelection(string selectionType, vector<Individual> population, int numIndividuals) {
-	if(selectionType == "rs")
-		return rankSelection(population, numIndividuals);
-	else if(selectionType == "ts")
-		return tournamentSelection(population, numIndividuals);
-	else if (selectionType == "bs")
-		return boltzmannSelection(population, numIndividuals);
-}
 
+vector<Individual> mutatePopulation(vector<Individual> population, double mutProb, int numIndividuals) {
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	std::uniform_real_distribution<double> gen(0.0, 1.0);
 
-vector<Individual> mutatePopulation(double mutProb, vector<Individual> population) {
-	uniform_real_distribution<double> randDouble(0.0,1.0);
-   	default_random_engine randomEngine;
-   	for(int j = 0; j < population.size(); j++){
-   		for(int i = 0; i < population.at(i).negationArray.size(); i++){
-		// randDouble(randomEngine) returns a random double between 0 and 1
-			if( randDouble(randomEngine) < mutProb ) 
-				population.at(i).negationArray.at(i) = population.at(i).negationArray.at(i) * -1;
+   	for(int i = 0; i < numIndividuals; i++){
+   		for(int j = 0; j < numberOfVariables; j++){
+			if(gen(engine) < mutProb) 
+				population.at(i).negationArray.at(j) *= -1;
 		}
    	}
 
@@ -327,21 +319,6 @@ vector<Individual> uniformCrossover(double crossProb, vector<Individual> populat
 	return returnPopulation;
 }
 
-vector<Individual> runCrossover(string crossoverType, int crossProb, vector<Individual> population ){
-	uniform_real_distribution<double> randDouble(0.0,1.0);
-   	default_random_engine randomEngine;
-   	if(crossProb <= randDouble(randomEngine)){
-   		if(crossoverType == "1c") 
-			return onePointCrossover(crossProb, population);
-		else if(crossoverType == "uc")
-			return uniformCrossover(crossProb, population);
-	}
-	else
-		return population;
-	
-	
-}
-
 
 int genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
 	vector<Individual> population;
@@ -350,9 +327,19 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 
 	//have seperate functions for each selection type and run a vertain amount of times
 	while(genCount != numGen || population.at(0).fitness != numberOfClauses) {
-		population = runSelection(selectionType, population, numIndividuals);
+		//does selection based on user input
+		if(selectionType == "rs")
+			population = rankSelection(population, numIndividuals);
+		else if(selectionType == "ts")
+			population = tournamentSelection(population, numIndividuals);
+		else if (selectionType == "bs")
+			population = boltzmannSelection(population, numIndividuals);
 
-		population = runCrossover(crossoverType, crossProb, population);
+		//does crossover based on user input
+		if(crossoverType == "1c") 
+			population = onePointCrossover(crossProb, population);
+		else if(crossoverType == "uc")
+			population = uniformCrossover(crossProb, population);
 
 		population = mutatePopulation(mutProb, population);
 
