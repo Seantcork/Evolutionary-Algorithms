@@ -25,6 +25,8 @@ const string BOLTZMANN_SELECTION = "bs";
 const string ONE_POINT_CROSSOVER = "1c"
 const string UNIFORM_CROSSOVER = "uc";
 
+int numberOfVariables;
+int numberOfClauses;
 
 
 struct bestSolutionSoFar
@@ -35,9 +37,9 @@ struct bestSolutionSoFar
 		
 	};
 
-int numberOfVariables;
-int numberOfClauses;
-
+/*
+	
+*/
 class Individual{
 
 	//are we creating a vector to hold the clauses
@@ -54,7 +56,7 @@ void Individual::calcFitness(vector<vector<int>> clauseFile){
 	for(int i = 0; i < clauseFile.size(); i++) {
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 
-			if(clauseFile.at(i).at(j) * this->varAssignmentArray.at(clauseFile.at(i).at(j)-1) > 0) {
+			if(clauseFile.at(i).at(j) * this->varAssignmentArray.at(clauseFile.at(i).at(j)-1) > 0){
 				this->fitness++;
 				break;
 			}
@@ -317,11 +319,11 @@ vector<Individual> uniformCrossover(vector<Individual> population, double crossP
    	for(int i = 0; i < numIndividuals; i += 2){
 
    		//checks whether crossover happens
-   		if(genDouble(engine) <= crossProb) {
+   		if(genDouble(engine) <= crossProb){
    			for(int j = 0; j < numberOfVariables; j++) {
    				
    				//creates the first child
-				if(genDouble(engine) <= .5) {
+				if(genDouble(engine) <= .5){
 					firstChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
 				}
 				else {
@@ -332,7 +334,7 @@ vector<Individual> uniformCrossover(vector<Individual> population, double crossP
 			  	   size and uniform crossover only makes 1 child, we will do two crossovers for each pair of
 			       parents (gives us two children from each parent).
 				*/
-				if(genDouble(engine) <= .5) {
+				if(genDouble(engine) <= .5){
 					secondChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
 				}
 				else {
@@ -367,8 +369,9 @@ vector<Individual> mutatePopulation(vector<Individual> population, double mutPro
 
    	for(int i = 0; i < numIndividuals; i++){
    		for(int j = 0; j < numberOfVariables; j++){
-			if(gen(engine) < mutProb) 
+			if(gen(engine) < mutProb){
 				population.at(i).varAssignmentArray.at(j) *= -1;
+			}
 		}
    	}
 
@@ -411,19 +414,24 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 		}
 
 		//does selection based on user input
-		if(selectionType.compare(RANK_SELECTION) == 0)
+		if(selectionType.compare(RANK_SELECTION) == 0){
 			population = rankSelection(population, numIndividuals);
-		else if(selectionType.compare(TOURNAMENT_SELECTION) == 0)
+		}
+		else if(selectionType.compare(TOURNAMENT_SELECTION) == 0){
 			population = tournamentSelection(population, numIndividuals);
-		else if (selectionType.compare(BOLTZMANN_SELECTION) == 0)
+		}
+		else if (selectionType.compare(BOLTZMANN_SELECTION) == 0){
 			population = boltzmannSelection(population, numIndividuals);
+		}
 
 
 		//does crossover based on user input
-		if(crossoverType.compare(ONE_POINT_CROSSOVER) == 0) 
+		if(crossoverType.compare(ONE_POINT_CROSSOVER) == 0){
 			population = onePointCrossover(population, crossProb, numIndividuals);
-		else if(crossoverType.compare(UNIFORM_CROSSOVER) == 0)
+		}
+		else if(crossoverType.compare(UNIFORM_CROSSOVER) == 0){
 			population = uniformCrossover(population, crossProb, numIndividuals);
+		}
 
 		population = mutatePopulation(population, mutProb, numIndividuals);
 
