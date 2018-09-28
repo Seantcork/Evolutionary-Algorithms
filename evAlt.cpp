@@ -22,13 +22,26 @@ class Individual{
 
 	//are we creating a vector to hold the clauses
 	public:
+		vector<int> varAssignmentArray;
 		int fitness = 0;
-		void calcFitness(vector<vector<int> > clauseFile);
-		// feel free to rename later - KP
-		vector<int> negationArray;
-
+		void calcFitness(vector<vector<int>> clauseFile);
 
 };
+
+// Changed this from int to void -- let me know if you think this still needs to be an int.
+void Individual::calcFitness(vector<vector<int>> clauseFile){
+
+	for(int i = 0; i < clauseFile.size(); i++) {
+		for(int j = 0; j < clauseFile.at(i).size(); j++){
+
+			if(clauseFile.at(i).at(j) * this->varAssignmentArray.at(clauseFile.at(i).at(j)-1) > 0) {
+				this->fitness++;
+				break;
+			}
+		}
+	}
+
+}
 
 //probably need to talk about this data structure to make sure we are doing this right
 vector< vector<int> > readFile(string name){
@@ -102,21 +115,6 @@ vector< vector<int> > readFile(string name){
 	return clauseFile;
 
 }
-
-// Changed this from int to void -- let me know if you think this still needs to be an int.
-void Individual::calcFitness(vector<vector<int> > clauseFile){
-
-	for(int i = 0; i < clauseFile.size(); i++) {
-		for(int j = 0; j < clauseFile.at(i).size(); j++){
-			if(clauseFile.at(i).at(j) * this->negationArray.at(clauseFile.at(i).at(j)-1) > 0) {
-				this->fitness++;
-				break;
-			}
-		}
-	}
-
-}
-
 
 bool sortPopulation(const Individual & s1, const Individual & s2){
    return s1.fitness < s2.fitness;
@@ -232,7 +230,7 @@ vector<Individual> mutatePopulation(vector<Individual> population, double mutPro
    	for(int i = 0; i < numIndividuals; i++){
    		for(int j = 0; j < numberOfVariables; j++){
 			if(gen(engine) < mutProb) 
-				population.at(i).negationArray.at(j) *= -1;
+				population.at(i).varAssignmentArray.at(j) *= -1;
 		}
    	}
 
@@ -243,80 +241,111 @@ vector<Individual> mutatePopulation(vector<Individual> population, double mutPro
 // Takes in two parent inviduals and the crossover probability
 // Returns a pair of children.
 // Haven't tested this function as of yet. 
-vector<Individual> onePointCrossover(double crossProb, vector<Individual> population){
+vector<Individual> onePointCrossover(vector<Individual> population, double crossProb, int numIndividuals){
 
-	uniform_real_distribution<double> randDouble(0.0,1.0);
-   	default_random_engine randomEngine;
-   	Individual firstChild, secondChild, firstParent, secondParent;
-   	vector<Individual> returnPopulation;
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	//we want to choose a crossover point (that excludes the ends) so we go from 1 to numVariables - 1
+	std::uniform_int_distribution<int> gen(1, numberOfVariables - 1);
+	std::uniform_int_distribution<double> genDouble(0.0, 1.0);
 
 
-   	for(int i = 0; i < population.size(); i += 2) {
-   		int crossoverPointIndex = 2 * ( rand() % ((firstParent.negationArray.size()-2)/2) ) + 1;
+   	Individual firstChild, secondChild;
+   	vector<Individual> newPopulation;
 
-   		// Crossover for first child
-   		for(int i = 0; i < firstParent.negationArray.size(); i++) {
-   			if(i >= crossoverPointIndex)
-   				firstChild.negationArray.push_back(secondParent.negationArray.at(i));
-   			else
-   				firstChild.negationArray.push_back(firstParent.negationArray.at(i));
+   	for(int i = 0; i < numIndividuals; i += 2) {
+
+   		//checks whether crossover happens
+   		if(genDouble(engine) <= crossProb){
+   			int crossoverPointIndex = gen(engine);
+
+   			//1-point crossover occurs at random index and creates two children
+   			for(int j = 0; j < numberOfVariables; j++) {
+   				if(j >= crossoverPointIndex) {
+   					firstChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
+   					secondChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
+   				}
+   				else {
+   					firstChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
+   					secondChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
+   				}
+   			}
+
+   			// Add children to return population and clear them for the next set of crossover
+   			newPopulation.push_back(firstChild);
+   			newPopulation.push_back(secondChild);
+   			firstChild.varAssignmentArray.clear();
+   			secondChild.varAssignmentArray.clear();
    		}
 
-   		// Crossover for second child
-   		for(int j = 0; j < secondParent.negationArray.size(); j++) {
-   			if(j <= crossoverPointIndex)
-   				secondChild.negationArray.push_back(secondParent.negationArray.at(j));
-   			else
-   				secondChild.negationArray.push_back(firstParent.negationArray.at(j));
+   		//if crossover doesn't happen, we keep the individuals from the old population
+   		else {
+   			newPopulation.push_back(population.at(i));
+			newPopulation.push_back(population.at(i+1));
    		}
-   		// Add children to return population and clear them for the next set of crossover
-   		returnPopulation.push_back(firstChild);
-   		returnPopulation.push_back(secondChild);
-   		firstChild.negationArray.clear();
-   		secondChild.negationArray.clear();
+   		
    	}
 
-   	return returnPopulation;
+   	return newPopulation;
 
    	
 }
 
-vector<Individual> uniformCrossover(double crossProb, vector<Individual> population) {
+vector<Individual> uniformCrossover(vector<Individual> population, double crossProb, int numIndividuals) {
 
-	Individual firstChild, secondChild, firstParent, secondParent;
-	uniform_real_distribution<double> randDouble(0.0,1.0);
-   	default_random_engine randomEngine;
-   	vector<Individual> returnPopulation;
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	//we want to choose a crossover point (that excludes the ends) so we go from 1 to numVariables - 1
+	std::uniform_int_distribution<int> gen(1, numberOfVariables - 1);
+	std::uniform_int_distribution<double> genDouble(0.0, 1.0);
 
-   	for(int i = 0; i < population.size(); i++ ){
-   		firstParent = population.at(i);
-   		secondParent = population.at(i+1);
 
-   		for(int i = 0; i < firstParent.negationArray.size(); i++) {
-			if(randDouble(randomEngine) <= .5) {
-				firstChild.negationArray.push_back(firstParent.negationArray.at(i));
+	Individual firstChild, secondChild;
+   	vector<Individual> newPopulation;
+
+   	for(int i = 0; i < numIndividuals; i += 2){
+
+   		//checks whether crossover happens
+   		if(genDouble(engine) <= crossProb) {
+   			for(int j = 0; j < numberOfVariables; j++) {
+   				
+   				//creates the first child
+				if(genDouble(engine) <= .5) {
+					firstChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
+				}
+				else {
+					firstChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
+				}
+
+				/* Creates the second child. Since we want the new population size to match old population
+			  	   size and uniform crossover only makes 1 child, we will do two crossovers for each pair of
+			       parents (gives us two children from each parent).
+				*/
+				if(genDouble(engine) <= .5) {
+					secondChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
+				}
+				else {
+					secondChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
+				}
+
+
 			}
-			else {
-				firstChild.negationArray.push_back(secondParent.negationArray.at(i));
-			}
-		}
 
-		for(int i = 0; i < firstParent.negationArray.size(); i++) {
-			if(randDouble(randomEngine) <= .5) {
-				secondChild.negationArray.push_back(firstParent.negationArray.at(i));
-			}
-			else {
-				secondChild.negationArray.push_back(secondParent.negationArray.at(i));
-			}
+			newPopulation.push_back(firstChild);
+			newPopulation.push_back(secondChild);
+			firstChild.varAssignmentArray.clear();
+			secondChild.varAssignmentArray.clear();
+   		}
 
-		}
-		returnPopulation.push_back(firstChild);
-		returnPopulation.push_back(secondChild);
-		firstChild.negationArray.clear();
-		secondChild.negationArray.clear();
+   		//if crossover doesn't happen, we keep the individuals from the old population
+   		else {
+   			newPopulation.push_back(population.at(i));
+			newPopulation.push_back(population.at(i+1));
+   		}
+
    	}
 
-	return returnPopulation;
+	return newPopulation;
 }
 
 
@@ -335,13 +364,14 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 		else if (selectionType == "bs")
 			population = boltzmannSelection(population, numIndividuals);
 
+
 		//does crossover based on user input
 		if(crossoverType == "1c") 
-			population = onePointCrossover(crossProb, population);
+			population = onePointCrossover(population, crossProb, numIndividuals);
 		else if(crossoverType == "uc")
-			population = uniformCrossover(crossProb, population);
+			population = uniformCrossover(population, crossProb, numIndividuals);
 
-		population = mutatePopulation(mutProb, population);
+		population = mutatePopulation(population, mutProb, numIndividuals);
 
 		genCount++;
 	}
