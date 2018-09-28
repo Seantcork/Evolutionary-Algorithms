@@ -105,10 +105,7 @@ void Individual::calcFitness(vector<vector<int> > clauseFile){
 
 	for(int i = 0; i < clauseFile.size(); i++) {
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
-			if(clauseFile.at(i).at(j) == 0)
-				break;
-
-			else if(clauseFile.at(i).at(j) * negationArray.at(clauseFile.at(i).at(j)-1) > 0) {
+			if(clauseFile.at(i).at(j) * this->negationArray.at(clauseFile.at(i).at(j)-1) > 0) {
 				fitness++;
 				break;
 			}
