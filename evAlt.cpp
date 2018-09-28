@@ -7,10 +7,14 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <algorithm>
 #include <sstream>
 #include <random>
+#include <math.h>
 using namespace std;
 
+const int TOURNAMENT_SELECTION_M = 2;
+const int TOURNAMENT_SELECTION_K = 1;
 
 int numberOfVariables;
 
@@ -18,7 +22,6 @@ class Individual{
 
 	//are we creating a vector to hold the clauses
 	public:
-		bool boolVal;
 		int fitness = 0;
 		void calcFitness(vector<vector<int> > clauseFile);
 		// feel free to rename later - KP
@@ -158,16 +161,65 @@ vector<Individual> rankSelection(vector<Individual> population, int numIndividua
 
 vector<Individual> tournamentSelection(vector<Individual> Population, int numIndividuals){
 
-	//manipulate population here or as a global.
-	
+	sort(population.begin(), population.end(), sortPopulation);
+	vector<Individual> breedingPool;
 
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	std::uniform_int_distribution<int> gen(0, numIndividuals-1); // uniform, unbiased
+
+	/* conducts tournament selection by choosing best m individuals (m random numbers)
+       and then choosing the best fit individual (highest number since individuals are
+       sorted by fitness) 
+     */
+	for(int i = 0; i < numIndividuals; i++){
+		vector<int> tournamentM;
+		for(int j = 0; j < TOURNAMENT_SELECTION_M; j++){
+			tournamentM.push_back(gen(engine));
+		}
+		breedingPool.push_back(population.at(*max_element(tournamentM.begin(), tournamentM.end())));
+	}
+
+	return breedingPool;
 
 }
 
 
-vector<Individual> boltzmanSelection(vector<Individual> Population, int numIndividuals){
+vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndividuals){
+	vector<Individual> breedingPool;
+	double sumBolztmannProbabilites = 0;
 
+	for(int i = 0; i < numIndividuals; i++){
+		sumBolztmannProbabilites += exp (population.at(i).fitness);
+	}
 
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	std::uniform_real_distribution<double> gen(0.0, 1.0);
+
+	vector<double> boltzmannProbabilities;
+
+	for(int i = 0; i < numIndividuals; i++){
+		if(i == 0){
+			boltzmannProbabilities.push_back((exp (population.at(i).fitness)) / sumBolztmannProbabilites);
+		}
+		else {
+			boltzmannProbabilities.push_back(((exp (population.at(i).fitness)) / sumBolztmannProbabilites) 
+				+ boltzmannProbabilities.at(i-1));
+		}
+	}
+
+	for(int i = 0; i < numIndividuals; i++){
+		double rand = gen(engine);
+		for(int j = 0; j < numIndividuals; j++){
+			if(rand <= boltzmannProbabilities.at(j)){
+				breedingPool.push_back(population.at(j));
+				break;
+			}
+		}
+	}
+
+	return breedingPool;
 
 }
 
@@ -177,7 +229,7 @@ vector<Individual> runSelection(string selectionType, vector<Individual> populat
 	else if(selectionType == "ts")
 		return tournamentSelection(population, numIndividuals);
 	else if (selectionType == "bs")
-		return boltzmanSelection(population, numIndividuals);
+		return boltzmannSelection(population, numIndividuals);
 }
 
 
