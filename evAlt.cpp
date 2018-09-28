@@ -351,11 +351,38 @@ vector<Individual> uniformCrossover(vector<Individual> population, double crossP
 
 int genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
 	vector<Individual> population;
-	// Initialize population here
+
+	std::random_device seeder;
+	std::mt19937 engine(seeder());
+	std::uniform_int_distribution<double> genDouble(0.0, 1.0);
+	
+	//initialize the population with random values
+	for(int i = 0; i < numIndividuals; i++){
+		Individual child;
+		for(int j = 0; j < numberOfVariables; j++){
+
+			//1 represents true, -1 is false (assingment of initial population is random)
+			if(genDouble(engine) <= 0.5){
+				child.varAssignmentArray.push_back(1);
+			}
+			else {
+				child.varAssignmentArray.push_back(-1);
+			}
+		}
+		population.push_back(child);
+	}
+
+	//to keep track of the number of iterations
 	int genCount = 0;
 
 	//have seperate functions for each selection type and run a vertain amount of times
 	while(genCount != numGen || population.at(0).fitness != numberOfClauses) {
+		
+		//evaluate the fitness of each individual
+		for(int i = 0; i < numIndividuals; i++) {
+			population.at(i).calcFitness;
+		}
+
 		//does selection based on user input
 		if(selectionType == "rs")
 			population = rankSelection(population, numIndividuals);
