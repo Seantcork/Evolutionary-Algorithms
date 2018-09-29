@@ -80,6 +80,7 @@ int Individual::calcFitness(vector<vector<int> > clauseFile){
 			}
 		}
 	}
+
 	return this->fitness;
 
 }
@@ -535,83 +536,78 @@ fittestFoundIndividual genetic_alg(vector<vector<int> > clauseFile,
 
 
 //returns index of worst solution
-fittestFoundIndividual findBestSolution(vector<Individual> sampleVector, vector<int> evaluations, fittestFoundIndividual best){
+Individual findBestSolution(vector<Individual> sampleVector, vector<vector<int> > clauseFile){
 
 	int bestFitness = 0;
 	int bestVectorIndex = 0;
 
 	for(int i = 0; i < sampleVector.size(); i++){
-		if(evaluations[i] > bestFitness){
-			bestFitness = evaluations[i];
+		//cout << evaluations[i] << endl;
+		sampleVector[i].calcFitness(clauseFile);
+		cout << "sample vector fitness " << sampleVector[i].fitness << endl;
+		if(sampleVector[i].fitness > bestFitness){
+			//cout << evaluations[i] << endl;
+			bestFitness = sampleVector[i].fitness;
 			bestVectorIndex = i;
 		}
 	}
-
-	best.bestVector = sampleVector[bestVectorIndex].varAssignmentArray;
-	best.bestFitness = bestFitness;
-
-	return best;
+	//cout << bestFitness << endl;
+	return sampleVector[bestVectorIndex];
 
 }
 
 //returns index of best solution
-vector<int> findWorstSolution(vector<Individual> sampleVector, vector<int> evaluations){
+Individual findWorstSolution(vector<Individual> sampleVector, vector<vector<int> > clauseFile ){
 
 
 	int worstFitness = 8000;
 	int worstFitnessIndex = 0;
 
 	for(int i = 0; i < sampleVector.size(); i++){
-		if(evaluations[i] < worstFitness){
-			worstFitness = evaluations[i];
+		sampleVector[i].calcFitness(clauseFile);
+		if(sampleVector[i].fitness < worstFitness){
+			worstFitness = sampleVector[i].fitness;
 			worstFitnessIndex = i;
 		}
 	}
 
-	return sampleVector[worstFitnessIndex].varAssignmentArray;
+	return sampleVector[worstFitnessIndex];
 
 }
 
 
 //generates a vector of bools for use in a pbil
-Individual* generateSampleVector(vector<double> probVector, int numberOfClauses){
+Individual generateSampleVector(vector<double> probVector, int numberOfClauses){
 
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(0.0, 1.0);
 
-    Individual *indv = new Individual;
-
-    cout << probVector.size() << endl;
+    Individual indv;
+    
 	for(int i = 0; i < probVector.size(); i ++){
 
 		//probability for chosing true or false;
 		double probForUse = dis(gen);
 
+
 		//if the porbability is useful than its one
 		if(probForUse <= probVector[i]){
+			//cout << "1" << endl;
 			
-			indv->varAssignmentArray.push_back(1);
+			indv.varAssignmentArray.push_back(1);
 		}
 
 		//if the probability is not than its zero
 		else{
-			indv->varAssignmentArray.push_back(0);
+			//cout << "2" << endl;
+			indv.varAssignmentArray.push_back(0);
 		}
 	}
 	
 	return indv;
 }
 
-//evaluation of fitness
-int evaluate(Individual indv, vector<vector<int> > clauseFile){
-
-	cout << "here" << endl;
-	indv.calcFitness(clauseFile);
-	cout << "guess not" << endl;
-	return indv.fitness;
-
-}
 
 
 void printBestVector(vector<int> bestVector){
@@ -624,78 +620,71 @@ void printBestVector(vector<int> bestVector){
 fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
  int numIndividuals, int posLearningRate, int negLearningRate, double mutProb,int mutationAmount, int numGen){
 
-
 	//helps us keep track of best individual so far
 
 	//create struct to keep track of bestIndividual
 	fittestFoundIndividual bestIndividual;
-	
 
+	//best individual from each roun
+
+
+	Individual child;
+	
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(0.0, 1.0);
 	
-    //used to keep track of fitness for vectors
-	vector<int> evaluations;
-
 	//probability vector
-	vector<double> probVector(numberOfVariables -1);
+	vector<double> probVector;
 
 
 	//best vector we have found so far
-	vector<int> bestVectorSoFar;
+	vector<int> bestVector;
+	vector<int> worstVector;
 	//the fitness of best vector
-	int bestFitnessSoFar = 0;
 
 	//vector used for sample population
 	vector<Individual> sampleVector;
 	//set normal probabilities
-	for(int i = 0; i >= numberOfVariables; i++){
-		probVector[i] = 0.5;
+	for(int i = 0; i < numberOfVariables; i++){
+		probVector.push_back(.5);
 	}
-
-
 	//generation nuymber
 	int generation = 0;
-	
-	
 	while(generation < numGen){
 
 		for(int i = 0; i < numIndividuals; i ++){
-			cout << "seg fault" << endl;
-			sampleVector.push_back(*generateSampleVector(probVector, numberOfClauses));
+			child = generateSampleVector(probVector, numberOfClauses);
+			//cout << child.varAssignmentArray.at(2) << endl;
+			//cout << child.calcFitness(clauseFile) << endl;
+			sampleVector.push_back(child);
 
-			//pretty unsure about this at the moment
-			cout << "this is seg fault" << endl;
-			evaluations.push_back(evaluate(sampleVector.at(i), clauseFile));
 		}
 
-		cout << "not seg fault" << endl;
-
-		vector<int> bestVector;
-		vector<int> worstVector;
+		Individual bestInRound;
+		Individual worstInRound;
 
 		//pass data into struct that keeps track of best solutions
-		bestIndividual = findBestSolution(sampleVector, evaluations, bestIndividual);
+		bestInRound = findBestSolution(sampleVector, clauseFile);
+		bestVector = bestInRound.varAssignmentArray;
 
-		//gives us the best vector from this iteration
-		bestVector = bestIndividual.bestVector;
-
-		//keep track of best individual we have found
-		if(bestIndividual.bestFitness > bestFitnessSoFar){
-			bestFitnessSoFar = bestIndividual.bestFitness;
-			bestVectorSoFar = bestVector;
+		if(bestInRound.fitness > bestIndividual.bestFitness){
+			bestIndividual.bestFitness =  bestInRound.fitness;
+			bestIndividual.bestVector = bestInRound.varAssignmentArray;
 		}
 
-		//keep track of worst vector for the increment
-		worstVector = findWorstSolution(sampleVector, evaluations);
+		//gives us the best vector from this iteration
+		//bestVector = bestRound.bestVector;
+		worstInRound = findWorstSolution(sampleVector, clauseFile);
+		worstVector = worstInRound.varAssignmentArray;
+
+		//keep track of best individual we have found
 
 		//generate positive learning rate 
 		for(int i = 0; i < probVector.size(); i++){
 			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i] * posLearningRate);
 
 		}
-
 		//generate nefatice learning rate
 		for(int i = 0; i < probVector.size(); i++){
 			if(bestVector[i] != worstVector[i]){
@@ -706,7 +695,6 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 		//mutation during pnil
 		int mutateDirection;
 		for(int i = 0; i < probVector.size(); i++){
-
 			//gen random
 			double random = dis(gen);
 
@@ -730,7 +718,6 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 		//increase generation
 		generation++;
 	}
-
 	return bestIndividual;
 }
 
@@ -745,7 +732,6 @@ int main(int argc, char *argv[]){
 	clauseFile = readFile(filename);
 
 	if(alg.compare(GENETIC_ALGORITHM) == 0){
-		cout << "int genetic" << endl;
 		string selectionType = argv[3];
 		string crossoverType = argv[4];
 		double crossProb = atoi(argv[5]);
@@ -765,7 +751,6 @@ int main(int argc, char *argv[]){
 
 		int numGen = atoi(argv[7]);
 
-		cout << "numgen " << numGen << endl;
 
 		result = pbil(clauseFile, numberOfClauses, numIndividuals, posLearningRate, negLearningRate, mutProb, mutationAmount, numGen);
 
@@ -773,7 +758,6 @@ int main(int argc, char *argv[]){
 
 	//clauseFile = readFile(filename);
 	double fitnessPercent = (double(result.bestFitness) / double(numberOfClauses)) * 100;
-	cout << fitnessPercent << endl;
 
 	cout << filename << endl;
 	cout << numberOfVariables << endl;
