@@ -301,40 +301,43 @@ vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndi
 
 }
 
-// Takes in two parent inviduals and the crossover probability
-// Returns a pair of children.
-// Haven't tested this function as of yet. 
-vector<Individual> onePointCrossover(vector<Individual> population, double crossProb, int numIndividuals){
+/*
+	Function that implements one-point crossover for the Genetic Algorithm. The function takes
+	in a breeding pool of individuals and performs crossover (based on the inputted crossover
+	probability) on pairs of individuals in the breeding pool. The crossover point is randomly
+	generated and the two children are added to the new population.
+*/
+vector<Individual> onePointCrossover(vector<Individual> breedingPool, double crossProb, int numIndividuals){
 
 	std::random_device seeder;
 	std::mt19937 engine(seeder());
-	//we want to choose a crossover point (that excludes the ends) so we go from 1 to numVariables - 1
+	//we want to choose a crossover point (that excludes the ends)
 	std::uniform_int_distribution<int> gen(1, numberOfVariables - 1);
 	std::uniform_int_distribution<double> genDouble(0.0, 1.0);
-
 
    	Individual firstChild, secondChild;
    	vector<Individual> newPopulation;
 
+   	//we increase i by 2, because we look at individuals in the breeding pool as pairs (parents)
    	for(int i = 0; i < numIndividuals; i += 2) {
 
    		//checks whether crossover happens
    		if(genDouble(engine) <= crossProb){
-   			int crossoverPointIndex = gen(engine);
 
    			//1-point crossover occurs at random index and creates two children
+   			int crossoverPointIndex = gen(engine);
    			for(int j = 0; j < numberOfVariables; j++) {
    				if(j >= crossoverPointIndex) {
-   					firstChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
-   					secondChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
+   					firstChild.varAssignmentArray.push_back(breedingPool.at(i+1).varAssignmentArray.at(j));
+   					secondChild.varAssignmentArray.push_back(breedingPool.at(i).varAssignmentArray.at(j));
    				}
    				else {
-   					firstChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
-   					secondChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
+   					firstChild.varAssignmentArray.push_back(breedingPool.at(i).varAssignmentArray.at(j));
+   					secondChild.varAssignmentArray.push_back(breedingPool.at(i+1).varAssignmentArray.at(j));
    				}
    			}
 
-   			// Add children to return population and clear them for the next set of crossover
+   			//add children to new population
    			newPopulation.push_back(firstChild);
    			newPopulation.push_back(secondChild);
    			firstChild.varAssignmentArray.clear();
@@ -343,8 +346,8 @@ vector<Individual> onePointCrossover(vector<Individual> population, double cross
 
    		//if crossover doesn't happen, we keep the individuals from the old population
    		else {
-   			newPopulation.push_back(population.at(i));
-			newPopulation.push_back(population.at(i+1));
+   			newPopulation.push_back(breedingPool.at(i));
+			newPopulation.push_back(breedingPool.at(i+1));
    		}
    		
    	}
@@ -354,30 +357,35 @@ vector<Individual> onePointCrossover(vector<Individual> population, double cross
    	
 }
 
-vector<Individual> uniformCrossover(vector<Individual> population, double crossProb, int numIndividuals) {
+/*
+	Function that implements uniform crossover for the Genetic Algorithm. The function takes
+	in a breeding pool of individuals and performs crossover (based on the inputted crossover
+	probability) on pairs of individuals in the breeding pool. Each element of the child comes
+	randomly from either parent (50% chance each). Because uniform crossover usually only 
+	creates one child, we are forcing crossover to occur twice with each parent pair.
+*/
+vector<Individual> uniformCrossover(vector<Individual> breedingPool, double crossProb, int numIndividuals) {
 
 	std::random_device seeder;
 	std::mt19937 engine(seeder());
-	//we want to choose a crossover point (that excludes the ends) so we go from 1 to numVariables - 1
-	std::uniform_int_distribution<int> gen(1, numberOfVariables - 1);
 	std::uniform_int_distribution<double> genDouble(0.0, 1.0);
-
 
 	Individual firstChild, secondChild;
    	vector<Individual> newPopulation;
 
+   	//again increase i by 2, because individuals are treated as pairs
    	for(int i = 0; i < numIndividuals; i += 2){
 
    		//checks whether crossover happens
    		if(genDouble(engine) <= crossProb){
    			for(int j = 0; j < numberOfVariables; j++) {
    				
-   				//creates the first child
+   				//creates the first child with 50% chance of each element coming from either parent
 				if(genDouble(engine) <= .5){
-					firstChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
+					firstChild.varAssignmentArray.push_back(breedingPool.at(i).varAssignmentArray.at(j));
 				}
 				else {
-					firstChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
+					firstChild.varAssignmentArray.push_back(breedingPool.at(i+1).varAssignmentArray.at(j));
 				}
 
 				/* Creates the second child. Since we want the new population size to match old population
@@ -385,15 +393,16 @@ vector<Individual> uniformCrossover(vector<Individual> population, double crossP
 			       parents (gives us two children from each parent).
 				*/
 				if(genDouble(engine) <= .5){
-					secondChild.varAssignmentArray.push_back(population.at(i).varAssignmentArray.at(j));
+					secondChild.varAssignmentArray.push_back(breedingPool.at(i).varAssignmentArray.at(j));
 				}
 				else {
-					secondChild.varAssignmentArray.push_back(population.at(i+1).varAssignmentArray.at(j));
+					secondChild.varAssignmentArray.push_back(breedingPool.at(i+1).varAssignmentArray.at(j));
 				}
 
 
 			}
 
+			//children are added to the new population
 			newPopulation.push_back(firstChild);
 			newPopulation.push_back(secondChild);
 			firstChild.varAssignmentArray.clear();
@@ -402,8 +411,8 @@ vector<Individual> uniformCrossover(vector<Individual> population, double crossP
 
    		//if crossover doesn't happen, we keep the individuals from the old population
    		else {
-   			newPopulation.push_back(population.at(i));
-			newPopulation.push_back(population.at(i+1));
+   			newPopulation.push_back(breedingPool.at(i));
+			newPopulation.push_back(breedingPool.at(i+1));
    		}
 
    	}
