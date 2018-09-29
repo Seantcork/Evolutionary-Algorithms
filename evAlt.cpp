@@ -28,7 +28,11 @@ const string UNIFORM_CROSSOVER = "uc";
 int numberOfVariables;
 int numberOfClauses;
 
-
+/*
+	Struct that stores all information about the most fit individual the 
+	algorithm has found thus far, including its assignments, its fitness, 
+	and the generation it was found in.
+*/
 struct fittestFoundIndividual
 	{
 		vector<int> bestVector;
