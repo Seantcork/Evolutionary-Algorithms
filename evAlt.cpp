@@ -615,7 +615,7 @@ void printBestVector(vector<int> bestVector){
 }
 
 fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
- int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
+ int numIndividuals, int posLearningRate, int negLearningRate, double mutProb,int mutationAmount, int numGen){
 
 
 	//helps us keep track of best individual so far
@@ -650,6 +650,7 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 
 	//generation nuymber
 	int generation = 0;
+	
 	
 	while(generation < numGen){
 		
@@ -710,7 +711,7 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 					mutateDirection = 0;
 				}
 				//mutation
-				probVector[i] = probVector[i] * (1.0 - .05) + (mutateDirection * .05);
+				probVector[i] = probVector[i] * (1.0 - mutationAmount) + (mutateDirection * mutationAmount);
 			}
 		}
 		//just in case
@@ -733,12 +734,12 @@ int main(int argc, char *argv[]){
 
 	fittestFoundIndividual result;
 	vector<vector<int> > clauseFile;
-	string alg = string(argv[7]);
+	string alg = string(argv[8]);
 	string filename = argv[1];
 	int numIndividuals = atoi(argv[2]);
 	clauseFile = readFile(filename);
 	
-	cout << alg.compare(GENETIC_ALGORITHM) << endl;
+
 	if(alg.compare(GENETIC_ALGORITHM) == 0){
 		cout << "int genetic" << endl;
 		string selectionType = argv[3];
@@ -752,13 +753,17 @@ int main(int argc, char *argv[]){
 	}
 
 	if(alg.compare(PBIL) == 0){
-		cout << "pbil" << endl;
 		double posLearningRate = atoi(argv[3]);
 		double negLearningRate = atoi(argv[4]);
 		double mutProb = atoi(argv[5]);
-		int numGen = atoi(argv[6]);
 
-		result = pbil(clauseFile, numberOfClauses, numIndividuals, posLearningRate, negLearningRate, mutProb, numGen);
+		double mutationAmount= atoi(argv[6]);
+
+		int numGen = atoi(argv[7]);
+
+		cout << "numgen " << numGen << endl;
+
+		result = pbil(clauseFile, numberOfClauses, numIndividuals, posLearningRate, negLearningRate, mutProb, mutationAmount, numGen);
 
 	}
 
