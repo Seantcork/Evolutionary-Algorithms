@@ -420,7 +420,12 @@ vector<Individual> uniformCrossover(vector<Individual> breedingPool, double cros
 	return newPopulation;
 }
 
-
+/*
+	Function that implements mutation for the Genetic Algorithm. The function does 
+	mutation on each element of each individual with the inputted mutation probability.
+	If mutation occurs, the element of the individual is flipped (true to false, false
+	to true).
+*/
 vector<Individual> mutatePopulation(vector<Individual> population, double mutProb, int numIndividuals) {
 	std::random_device seeder;
 	std::mt19937 engine(seeder());
@@ -428,6 +433,8 @@ vector<Individual> mutatePopulation(vector<Individual> population, double mutPro
 
    	for(int i = 0; i < numIndividuals; i++){
    		for(int j = 0; j < numberOfVariables; j++){
+
+   			//checks if mutation occurs on the element, if so flips the element
 			if(gen(engine) < mutProb){
 				population.at(i).varAssignmentArray.at(j) *= -1;
 			}
@@ -438,6 +445,12 @@ vector<Individual> mutatePopulation(vector<Individual> population, double mutPro
 
 }
 
+/*
+	Function that implements the Genetic Algorithm. The function initializes a random population
+	of size numIndividuals, where the elements of the individuals are randomly generated. The
+	algorithm then executes the specified selection, crossover, and mutation for the specified
+	number of generations or until a best fit individual is found.
+*/
 int genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
 	vector<Individual> population;
 
@@ -450,7 +463,7 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 		Individual child;
 		for(int j = 0; j < numberOfVariables; j++){
 
-			//1 represents true, -1 is false (assingment of initial population is random)
+			//1 represents true, -1 is false
 			if(genDouble(engine) <= 0.5){
 				child.varAssignmentArray.push_back(1);
 			}
@@ -461,10 +474,8 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 		population.push_back(child);
 	}
 
-	//to keep track of the number of iterations
+	//loops for the specified number of generations
 	int genCount = 0;
-
-	//have seperate functions for each selection type and run a vertain amount of times
 	while(genCount != numGen || population.at(0).fitness != numberOfClauses) {
 		
 		//evaluate the fitness of each individual
@@ -483,7 +494,6 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 			population = boltzmannSelection(population, numIndividuals);
 		}
 
-
 		//does crossover based on user input
 		if(crossoverType.compare(ONE_POINT_CROSSOVER) == 0){
 			population = onePointCrossover(population, crossProb, numIndividuals);
@@ -492,6 +502,7 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 			population = uniformCrossover(population, crossProb, numIndividuals);
 		}
 
+		//does mutation
 		population = mutatePopulation(population, mutProb, numIndividuals);
 
 		genCount++;
