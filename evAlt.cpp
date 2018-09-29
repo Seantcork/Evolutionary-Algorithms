@@ -8,6 +8,7 @@
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include <assert.h>     /* assert */
 #include <sstream>
 #include <random>
 #include <math.h>
@@ -65,16 +66,16 @@ class Individual{
 	fitness will be calculated after selection/mutation occurs.
 */
 int Individual::calcFitness(vector<vector<int> > clauseFile){
-
+	bool clauseTrue = false;
 	for(int i = 0; i < clauseFile.size(); i++) {
 
 		//checks all elements in a clause
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 
 			//if any element in the clause is true, then the clause is true
-			if(clauseFile.at(i).at(j) * this->varAssignmentArray.at(clauseFile.at(i).at(j)-1) > 0){
+			if(clauseTrue == false && (clauseFile.at(i).at(j) * this->varAssignmentArray.at(abs(clauseFile.at(i).at(j))-1)) > 0){
 				this->fitness++;
-				break;
+				clauseTrue = true;
 			}
 		}
 	}
@@ -477,21 +478,23 @@ fittestFoundIndividual genetic_alg(vector<vector<int> > clauseFile,
 		population.push_back(child);
 	}
 
+
 	//keeps track of the best individual found so far
 	fittestFoundIndividual bestIndividual;
 
 
 	//loops for the specified number of generations
-	int genCount = 0;
-	while(genCount != numGen || population.at(0).fitness != numberOfClauses) {
+	int genCount = 1;
+	while(genCount <= numGen && population.at(0).fitness != numberOfClauses) {
 		
 		//evaluate the fitness of each individual, and store if best found individual
 		for(int i = 0; i < numIndividuals; i++) {
 			if(population.at(i).calcFitness(clauseFile) > bestIndividual.bestFitness){
+
 				bestIndividual.bestFitness = population.at(i).fitness;
 				bestIndividual.bestVector = population.at(i).varAssignmentArray;
 				bestIndividual.iteration = genCount;
-
+				assert(bestIndividual.bestFitness <= numberOfClauses);
 				if(bestIndividual.bestFitness == numberOfClauses){
 					return bestIndividual;
 				}
@@ -642,18 +645,18 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 
 	//vector used for sample population
 	vector<Individual> sampleVector;
-
 	//set normal probabilities
 	for(int i = 0; i < numberOfVariables; i++){
 		probVector[i] = 0.5;
 	}
+
 
 	//generation nuymber
 	int generation = 0;
 	
 	
 	while(generation < numGen){
-		
+
 		for(int i = 0; i < numIndividuals; i ++){
 			sampleVector.push_back(*generateSampleVector(probVector, numberOfClauses));
 
@@ -726,19 +729,12 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 
 int main(int argc, char *argv[]){
 
-	// srand (time(NULL));
-	// for(int i = 0; i < 50; i++ ){
-	// 	cout << "crossoverPointIndex: " << 2 * ( rand() % ((20-2)/2) ) + 1 << endl;
-
-	// }
-
 	fittestFoundIndividual result;
 	vector<vector<int> > clauseFile;
 	string alg = string(argv[8]);
 	string filename = argv[1];
 	int numIndividuals = atoi(argv[2]);
 	clauseFile = readFile(filename);
-	
 
 	if(alg.compare(GENETIC_ALGORITHM) == 0){
 		cout << "int genetic" << endl;
@@ -768,15 +764,15 @@ int main(int argc, char *argv[]){
 	}
 
 	//clauseFile = readFile(filename);
-
-	cout << "clasue file size" << clauseFile.size() << endl;
+	double fitnessPercent = (double(result.bestFitness) / double(numberOfClauses)) * 100;
+	cout << fitnessPercent << endl;
 
 	cout << filename << endl;
 	cout << numberOfVariables << endl;
-	cout << numberOfClauses << endl;
-	cout << result.bestFitness << endl;
-	cout << (result.bestFitness/numberOfClauses) * 100 << "% " << endl;
-	printBestVector(result.bestVector);
+	cout << "number of clauses: " << numberOfClauses << endl;
+	cout << "Result Best Fitness: " << result.bestFitness << endl;
+	cout << "Fitness Percent: " << fitnessPercent << "% " << endl;
+	// printBestVector(result.bestVector);
 	cout << result.iteration << endl;
 	
 
