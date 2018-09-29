@@ -67,6 +67,7 @@ class Individual{
 */
 int Individual::calcFitness(vector<vector<int> > clauseFile){
 	bool clauseTrue = false;
+
 	for(int i = 0; i < clauseFile.size(); i++) {
 
 		//checks all elements in a clause
@@ -110,14 +111,14 @@ vector< vector<int> > readFile(string name){
 		line.erase(0, position + delimiter.length());
 
 	}
-	numberOfClauses = stoi(number);
+	numberOfVariables = stoi(number);
 
 	position = line.find(delimiter);
 
 	number = line.substr(0, position);
 
 	line.erase(0, position + delimiter.length());
-	numberOfVariables = stoi(number);
+	numberOfClauses = stoi(number);
 
 	//check to see if the file is actually open
 	if(! input.is_open()){
@@ -581,7 +582,7 @@ Individual* generateSampleVector(vector<double> probVector, int numberOfClauses)
 
     Individual *indv = new Individual;
 
-
+    cout << probVector.size() << endl;
 	for(int i = 0; i < probVector.size(); i ++){
 
 		//probability for chosing true or false;
@@ -589,22 +590,25 @@ Individual* generateSampleVector(vector<double> probVector, int numberOfClauses)
 
 		//if the porbability is useful than its one
 		if(probForUse <= probVector[i]){
-			indv->varAssignmentArray[i] = 1;
+			
+			indv->varAssignmentArray.push_back(1);
 		}
 
 		//if the probability is not than its zero
 		else{
-			indv->varAssignmentArray[i] = 0;
+			indv->varAssignmentArray.push_back(0);
 		}
 	}
-
+	
 	return indv;
 }
 
 //evaluation of fitness
 int evaluate(Individual indv, vector<vector<int> > clauseFile){
 
+	cout << "here" << endl;
 	indv.calcFitness(clauseFile);
+	cout << "guess not" << endl;
 	return indv.fitness;
 
 }
@@ -646,7 +650,7 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 	//vector used for sample population
 	vector<Individual> sampleVector;
 	//set normal probabilities
-	for(int i = 0; i < numberOfVariables; i++){
+	for(int i = 0; i >= numberOfVariables; i++){
 		probVector[i] = 0.5;
 	}
 
@@ -658,11 +662,15 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 	while(generation < numGen){
 
 		for(int i = 0; i < numIndividuals; i ++){
+			cout << "seg fault" << endl;
 			sampleVector.push_back(*generateSampleVector(probVector, numberOfClauses));
 
 			//pretty unsure about this at the moment
-			evaluations.push_back(evaluate(sampleVector[i], clauseFile));
+			cout << "this is seg fault" << endl;
+			evaluations.push_back(evaluate(sampleVector.at(i), clauseFile));
 		}
+
+		cout << "not seg fault" << endl;
 
 		vector<int> bestVector;
 		vector<int> worstVector;
