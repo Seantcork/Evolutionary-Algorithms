@@ -29,10 +29,10 @@ int numberOfVariables;
 int numberOfClauses;
 
 
-struct bestSolutionSoFar
+struct fittestFoundIndividual
 	{
 		vector<int> bestVector;
-		int bestFitness;
+		int bestFitness = 0;
 		int iteration;
 		
 	};
@@ -60,7 +60,7 @@ class Individual{
 	by the number of clauses that the individual has correct in the MAXSAT file. This
 	fitness will be calculated after selection/mutation occurs.
 */
-void Individual::calcFitness(vector<vector<int>> clauseFile){
+int Individual::calcFitness(vector<vector<int>> clauseFile){
 
 	for(int i = 0; i < clauseFile.size(); i++) {
 
@@ -74,6 +74,7 @@ void Individual::calcFitness(vector<vector<int>> clauseFile){
 			}
 		}
 	}
+	return this->fitness;
 
 }
 
@@ -207,10 +208,12 @@ vector<Individual> rankSelection(vector<Individual> population, int numIndividua
 	for(int i = 0; i < numIndividuals; i++){
 		int rand = gen(engine);
 		for(int j = 0; j < numIndividuals; j++){
+
 			if(rand <= rankProbabilities.at(j)){
 				breedingPool.push_back(population.at(j));
 				break;
 			}
+
 		}
 	}
 
@@ -354,7 +357,6 @@ vector<Individual> onePointCrossover(vector<Individual> breedingPool, double cro
 
    	return newPopulation;
 
-   	
 }
 
 /*
@@ -398,7 +400,6 @@ vector<Individual> uniformCrossover(vector<Individual> breedingPool, double cros
 				else {
 					secondChild.varAssignmentArray.push_back(breedingPool.at(i+1).varAssignmentArray.at(j));
 				}
-
 
 			}
 
@@ -451,7 +452,7 @@ vector<Individual> mutatePopulation(vector<Individual> population, double mutPro
 	algorithm then executes the specified selection, crossover, and mutation for the specified
 	number of generations or until a best fit individual is found.
 */
-int genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
+fittestFoundIndividual genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
 	vector<Individual> population;
 
 	std::random_device seeder;
@@ -474,13 +475,26 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 		population.push_back(child);
 	}
 
+	//keeps track of the best individual found so far
+	fittestFoundIndividual bestIndividual;
+
+
 	//loops for the specified number of generations
 	int genCount = 0;
 	while(genCount != numGen || population.at(0).fitness != numberOfClauses) {
 		
-		//evaluate the fitness of each individual
+		//evaluate the fitness of each individual, and store if best found individual
 		for(int i = 0; i < numIndividuals; i++) {
-			population.at(i).calcFitness;
+			if(population.at(i).calcFitness > bestIndividual.bestFitness){
+				bestIndividual.bestFitness = population.at(i).fitness;
+				bestIndividual.bestVector = population.at(i).varAssignmentArray;
+				bestIndividual.iteration = genCount;
+
+				if(bestIndividual.bestFitness == numberOfClauses){
+					return bestIndividual;
+				}
+
+			}
 		}
 
 		//does selection based on user input
@@ -507,6 +521,8 @@ int genetic_alg(string selectionType, string crossoverType, int numberOfClauses,
 
 		genCount++;
 	}
+
+	return bestIndividual;
 
 }
 
@@ -586,14 +602,13 @@ int evaluate(Individual indv, vector<vector<int> > clauseFile){
 
 }
 
-
-bestSolutionSoFar pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
+fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
 
 
 	//helps us keep track of best individual so far
 
 	//create struct to keep track of bestIndividual
-	bestSolutionSoFar bestIndividual;
+	fittestFoundIndividual bestIndividual;
 	
 
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -703,7 +718,7 @@ int main(int argc, char *argv[]){
 
 	// }
 
-	bestSolutionSoFar result;
+	fittestFoundIndividual result;
 	vector<vector<int> > clauseFile;
 	string alg = string(argv[7]);
 	string filename = argv[1];
