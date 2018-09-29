@@ -22,7 +22,7 @@ const int TOURNAMENT_SELECTION_M = 2;
 const int TOURNAMENT_SELECTION_K = 1;
 const string BOLTZMANN_SELECTION = "bs";
 
-const string ONE_POINT_CROSSOVER = "1c"
+const string ONE_POINT_CROSSOVER = "1c";
 const string UNIFORM_CROSSOVER = "uc";
 
 int numberOfVariables;
@@ -33,13 +33,13 @@ int numberOfClauses;
 	algorithm has found thus far, including its assignments, its fitness, 
 	and the generation it was found in.
 */
-struct fittestFoundIndividual
+typedef struct 
 	{
 		vector<int> bestVector;
 		int bestFitness = 0;
 		int iteration;
 		
-	};
+	}fittestFoundIndividual;
 
 class Individual{
 	/*
@@ -55,7 +55,7 @@ class Individual{
 	public:
 		vector<int> varAssignmentArray;
 		int fitness = 0;
-		void calcFitness(vector<vector<int>> clauseFile);
+		int calcFitness(vector<vector<int> > clauseFile);
 
 };
 
@@ -64,7 +64,7 @@ class Individual{
 	by the number of clauses that the individual has correct in the MAXSAT file. This
 	fitness will be calculated after selection/mutation occurs.
 */
-int Individual::calcFitness(vector<vector<int>> clauseFile){
+int Individual::calcFitness(vector<vector<int> > clauseFile){
 
 	for(int i = 0; i < clauseFile.size(); i++) {
 
@@ -232,7 +232,7 @@ vector<Individual> rankSelection(vector<Individual> population, int numIndividua
 	the larger one, which is the index of the fitter individual in the population. This
 	repeats until the new population has size numIndividuals.
 */
-vector<Individual> tournamentSelection(vector<Individual> Population, int numIndividuals){
+vector<Individual> tournamentSelection(vector<Individual> population, int numIndividuals){
 
 	sort(population.begin(), population.end(), sortPopulation);
 	vector<Individual> breedingPool;
@@ -266,7 +266,7 @@ vector<Individual> tournamentSelection(vector<Individual> Population, int numInd
 
 	Funtion = e^(fi) / sum(e^fj)
 */
-vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndividuals){
+vector<Individual> boltzmannSelection(vector<Individual> population, int numIndividuals){
 	vector<Individual> breedingPool;
 
 	//need to calculate the denominator of the boltzmann function (sum of e^fj)
@@ -456,7 +456,10 @@ vector<Individual> mutatePopulation(vector<Individual> population, double mutPro
 	algorithm then executes the specified selection, crossover, and mutation for the specified
 	number of generations or until a best fit individual is found.
 */
-fittestFoundIndividual genetic_alg(string selectionType, string crossoverType, int numberOfClauses, int numIndividuals, double crossProb, double mutProb, int numGen){
+fittestFoundIndividual genetic_alg(vector<vector<int> > clauseFile,
+	string selectionType, string crossoverType, int numberOfClauses,
+	 int numIndividuals, double crossProb, double mutProb, int numGen){
+	
 	vector<Individual> population;
 
 	std::random_device seeder;
@@ -489,7 +492,7 @@ fittestFoundIndividual genetic_alg(string selectionType, string crossoverType, i
 		
 		//evaluate the fitness of each individual, and store if best found individual
 		for(int i = 0; i < numIndividuals; i++) {
-			if(population.at(i).calcFitness > bestIndividual.bestFitness){
+			if(population.at(i).calcFitness(clauseFile) > bestIndividual.bestFitness){
 				bestIndividual.bestFitness = population.at(i).fitness;
 				bestIndividual.bestVector = population.at(i).varAssignmentArray;
 				bestIndividual.iteration = genCount;
@@ -533,7 +536,7 @@ fittestFoundIndividual genetic_alg(string selectionType, string crossoverType, i
 
 
 //returns index of worst solution
-bestSolution findBestSolution(vector<Individual> sampleVector, vector<int> evaluations, bestSolution best){
+fittestFoundIndividual findBestSolution(vector<Individual> sampleVector, vector<int> evaluations, fittestFoundIndividual best){
 
 	int bestFitness = 0;
 	int bestVectorIndex = 0;
@@ -547,6 +550,8 @@ bestSolution findBestSolution(vector<Individual> sampleVector, vector<int> evalu
 
 	best.bestVector = sampleVector[bestVectorIndex].varAssignmentArray;
 	best.bestFitness = bestFitness;
+
+	return best;
 
 }
 
@@ -606,7 +611,16 @@ int evaluate(Individual indv, vector<vector<int> > clauseFile){
 
 }
 
-fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses, int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
+
+void printBestVector(vector<int> bestVector){
+
+	for(int i = 0; i < bestVector.size(); i++){
+		cout << bestVector.at(i) << endl;
+	}
+}
+
+fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
+ int numIndividuals, int posLearningRate, int negLearningRate, double mutProb, int numGen){
 
 
 	//helps us keep track of best individual so far
@@ -661,8 +675,8 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 		bestVector = bestIndividual.bestVector;
 
 		//keep track of best individual we have found
-		if(bestIndividual.fitness > bestFitnessSoFar){
-			bestFitnessSoFar = bestIndividual.fitness;
+		if(bestIndividual.bestFitness > bestFitnessSoFar){
+			bestFitnessSoFar = bestIndividual.bestFitness;
 			bestVectorSoFar = bestVector;
 		}
 
@@ -710,7 +724,7 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 		generation++;
 	}
 
-	return bestIndividualt;
+	return bestIndividual;
 }
 
 
@@ -735,7 +749,7 @@ int main(int argc, char *argv[]){
 		double mutProb = atoi(argv[6]);
 		int numGen = atoi(argv[7]);
 
-		result = genetic_alg();
+		result = genetic_alg(clauseFile, selectionType, crossoverType, numberOfClauses, numIndividuals, crossProb, mutProb, numGen);
 
 	}
 
@@ -745,16 +759,18 @@ int main(int argc, char *argv[]){
 		double mutProb = atoi(argv[5]);
 		int numGen = atoi(argv[6]);
 
-		result = pbil();
+		result = pbil(clauseFile, numberOfClauses, numIndividuals, posLearningRate, negLearningRate, mutProb, numGen);
 
 	}
 
 	clauseFile = readFile(filename);
 
+	cout << "clasue file size" << clauseFile.size() << endl;
+
 	cout << filename << endl;
-	cout << numVariables << endl;
+	cout << numberOfVariables << endl;
 	cout << numberOfClauses << endl;
-	cout << (result.bestFitness/numVariables) * 100 << "% " << endl;
+	cout << (result.bestFitness/numberOfClauses) * 100 << "% " << endl;
 	printBestVector(result.bestVector);
 	cout << result.iteration << endl;
 	
