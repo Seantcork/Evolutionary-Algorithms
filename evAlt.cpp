@@ -251,9 +251,18 @@ vector<Individual> tournamentSelection(vector<Individual> Population, int numInd
 
 }
 
+/*
+	Function that implements Boltzmann selection for the Genetic Algorithm. The function
+	assigns probability to each individual based on the boltzmann function (using the
+	fitness of the individual rather than its rank). Based on these probabilities, 
+	random individuals are chosen until the new population is of size numIndividuals.
 
+	Funtion = e^(fi) / sum(e^fj)
+*/
 vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndividuals){
 	vector<Individual> breedingPool;
+
+	//need to calculate the denominator of the boltzmann function (sum of e^fj)
 	double sumBolztmannProbabilites = 0;
 
 	for(int i = 0; i < numIndividuals; i++){
@@ -264,6 +273,7 @@ vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndi
 	std::mt19937 engine(seeder());
 	std::uniform_real_distribution<double> gen(0.0, 1.0);
 
+	//vector that stores the probabilities of each individual
 	vector<double> boltzmannProbabilities;
 
 	for(int i = 0; i < numIndividuals; i++){
@@ -276,6 +286,7 @@ vector<Individual> boltzmannSelection(vector<Individual> Population, int numIndi
 		}
 	}
 
+	//choosing a random individual based on probabilities and adds it to new population
 	for(int i = 0; i < numIndividuals; i++){
 		double rand = gen(engine);
 		for(int j = 0; j < numIndividuals; j++){
