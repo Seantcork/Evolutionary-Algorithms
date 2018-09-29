@@ -80,7 +80,6 @@ int Individual::calcFitness(vector<vector<int> > clauseFile){
 			}
 		}
 	}
-
 	return this->fitness;
 
 }
@@ -542,11 +541,8 @@ Individual findBestSolution(vector<Individual> sampleVector, vector<vector<int> 
 	int bestVectorIndex = 0;
 
 	for(int i = 0; i < sampleVector.size(); i++){
-		//cout << evaluations[i] << endl;
 		sampleVector[i].calcFitness(clauseFile);
-		cout << "sample vector fitness " << sampleVector[i].fitness << endl;
 		if(sampleVector[i].fitness > bestFitness){
-			//cout << evaluations[i] << endl;
 			bestFitness = sampleVector[i].fitness;
 			bestVectorIndex = i;
 		}
@@ -606,6 +602,7 @@ Individual generateSampleVector(vector<double> probVector, int numberOfClauses){
 	}
 	
 	return indv;
+	//initialize the population with random values
 }
 
 
@@ -626,7 +623,6 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 	fittestFoundIndividual bestIndividual;
 
 	//best individual from each roun
-
 
 	Individual child;
 	
@@ -653,12 +649,19 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 	int generation = 0;
 	while(generation < numGen){
 
-		for(int i = 0; i < numIndividuals; i ++){
-			child = generateSampleVector(probVector, numberOfClauses);
-			//cout << child.varAssignmentArray.at(2) << endl;
-			//cout << child.calcFitness(clauseFile) << endl;
-			sampleVector.push_back(child);
+		for(int i = 0; i < numIndividuals; i++){
+			Individual child;
+			for(int j = 0; j < numberOfVariables; j++){
 
+			//1 represents true, -1 is false
+				if(dis(gen) <= probVector[j]){
+					child.varAssignmentArray.push_back(1);
+				}
+				else {
+					child.varAssignmentArray.push_back(-1);
+				}
+			}
+			sampleVector.push_back(child);
 		}
 
 		Individual bestInRound;
