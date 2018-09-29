@@ -100,12 +100,9 @@ vector< vector<int> > readFile(string name){
 	string delimiter = " ";
 	int position;
 	string number;
-	for(int i = 0; i < 2; i++){
+	for(int i = 0; i < 3; i++){
 
 		position = line.find(delimiter);
-		if(position == string::npos){
-			cout << "error" << endl;
-		}
 
 		number = line.substr(0, position);
 
@@ -115,9 +112,7 @@ vector< vector<int> > readFile(string name){
 	numberOfClauses = stoi(number);
 
 	position = line.find(delimiter);
-	if(position == string::npos){
-		cout << "error" << endl;
-	}
+
 	number = line.substr(0, position);
 
 	line.erase(0, position + delimiter.length());
@@ -741,8 +736,11 @@ int main(int argc, char *argv[]){
 	string alg = string(argv[7]);
 	string filename = argv[1];
 	int numIndividuals = atoi(argv[2]);
-
+	clauseFile = readFile(filename);
+	
+	cout << alg.compare(GENETIC_ALGORITHM) << endl;
 	if(alg.compare(GENETIC_ALGORITHM) == 0){
+		cout << "int genetic" << endl;
 		string selectionType = argv[3];
 		string crossoverType = argv[4];
 		double crossProb = atoi(argv[5]);
@@ -754,6 +752,7 @@ int main(int argc, char *argv[]){
 	}
 
 	if(alg.compare(PBIL) == 0){
+		cout << "pbil" << endl;
 		double posLearningRate = atoi(argv[3]);
 		double negLearningRate = atoi(argv[4]);
 		double mutProb = atoi(argv[5]);
@@ -763,13 +762,14 @@ int main(int argc, char *argv[]){
 
 	}
 
-	clauseFile = readFile(filename);
+	//clauseFile = readFile(filename);
 
 	cout << "clasue file size" << clauseFile.size() << endl;
 
 	cout << filename << endl;
 	cout << numberOfVariables << endl;
 	cout << numberOfClauses << endl;
+	cout << result.bestFitness << endl;
 	cout << (result.bestFitness/numberOfClauses) * 100 << "% " << endl;
 	printBestVector(result.bestVector);
 	cout << result.iteration << endl;
