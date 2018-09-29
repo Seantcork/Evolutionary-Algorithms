@@ -188,9 +188,9 @@ vector<Individual> rankSelection(vector<Individual> population, int numIndividua
 	//rank sum is the total of all ranks, needed to create probabilites from ranks
 	int rankSum = numIndividuals * (numIndividuals + 1) * 0.5;
 
+	//the random individual must be between rank probability 1 and the maximum probability
 	std::random_device seeder;
 	std::mt19937 engine(seeder());
-	//the random individual must be between rank probability 1 and the maximum probability
 	std::uniform_int_distribution<int> gen(1, rankSum);
 
 	//this stores the rank probabilities in the probability vector
@@ -218,15 +218,22 @@ vector<Individual> rankSelection(vector<Individual> population, int numIndividua
 
 }
 
-
+/*
+	Function that implements tournament selection for the Genetic Algorithm. The function
+	picks m random individuals (in this case 2) and selects the best k (in this case 1). 
+	Because the population is sorted we can simply generate two random numbers and choose
+	the larger one, which is the index of the fitter individual in the population. This
+	repeats until the new population has size numIndividuals.
+*/
 vector<Individual> tournamentSelection(vector<Individual> Population, int numIndividuals){
 
 	sort(population.begin(), population.end(), sortPopulation);
 	vector<Individual> breedingPool;
 
+	//the randomly chosen individuals must be within the population index
 	std::random_device seeder;
 	std::mt19937 engine(seeder());
-	std::uniform_int_distribution<int> gen(0, numIndividuals-1); // uniform, unbiased
+	std::uniform_int_distribution<int> gen(0, numIndividuals-1);
 
 	/* conducts tournament selection by choosing best m individuals (m random numbers)
        and then choosing the best fit individual (highest number since individuals are
