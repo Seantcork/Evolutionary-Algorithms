@@ -588,6 +588,11 @@ it was found at.
 Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
  int numIndividuals, double posLearningRate, double negLearningRate, double mutProb, double mutationAmount, int numGen){
 
+ 	cout << posLearningRate << endl;
+ 	cout << negLearningRate << endl;
+ 	cout << mutProb << endl;
+ 	cout << mutationAmount << endl;
+
 	Individual bestIndividual;
 	
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -662,17 +667,17 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 
 		//generate positive learning rate 
 		for(int i = 0; i < probVector.size(); i++){
-			// if(probVector[i] >= 1 || probVector[i] <= 0){
-			// 	continue;
-			// }
+			if(probVector[i] >= 1 || probVector[i] <= 0){
+				continue;
+			}
 			probVector[i] = probVector[i] * (1.0 - posLearningRate) + bestVector[i] * posLearningRate;
 
 		}
 		//generate nefatice learning rate
 		for(int i = 0; i < probVector.size(); i++){
-			// if(probVector[i] >=1 || probVector[i] <= 0){
-			// 	continue;
-			// }
+			if(probVector[i] >=1 || probVector[i] <= 0){
+				continue;
+			}
 			if(bestVector.at(i) != worstVector.at(i)){
 				probVector[i] = probVector[i] * (1.0 - negLearningRate) + bestVector[i] * negLearningRate;
 			}
