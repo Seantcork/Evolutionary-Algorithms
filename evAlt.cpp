@@ -586,7 +586,7 @@ it was found at.
 
 */
 Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
- int numIndividuals, int posLearningRate, int negLearningRate, double mutProb,int mutationAmount, int numGen){
+ int numIndividuals, double posLearningRate, double negLearningRate, double mutProb, double mutationAmount, int numGen){
 
 	Individual bestIndividual;
 	
