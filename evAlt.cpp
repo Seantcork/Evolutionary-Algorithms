@@ -651,7 +651,7 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 		if(bestInRound.fitness > bestIndividual.fitness){
 			bestIndividual.fitness = bestInRound.fitness;
 			bestIndividual.varAssignmentArray = bestInRound.varAssignmentArray;
-			bestIndividual.iteration = bestInRound.iteration;
+			bestIndividual.iteration = generation;
 		}
 
 
@@ -662,11 +662,17 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 
 		//generate positive learning rate 
 		for(int i = 0; i < probVector.size(); i++){
+			// if(probVector[i] >= 1 || probVector[i] <= 0){
+			// 	continue;
+			// }
 			probVector[i] = probVector[i] * (1.0 - posLearningRate) + bestVector[i] * posLearningRate;
 
 		}
 		//generate nefatice learning rate
 		for(int i = 0; i < probVector.size(); i++){
+			// if(probVector[i] >=1 || probVector[i] <= 0){
+			// 	continue;
+			// }
 			if(bestVector.at(i) != worstVector.at(i)){
 				probVector[i] = probVector[i] * (1.0 - negLearningRate) + bestVector[i] * negLearningRate;
 			}
@@ -749,7 +755,7 @@ int main(int argc, char *argv[]){
 	cout << "Result Best Fitness: " << result.fitness << endl;
 	cout << "Fitness Percent: " << fitnessPercent << "% " << endl;
 
-	printBestVector(result.varAssignmentArray, numberOfVariables);
+	printBestVector(result.varAssignmentArray);
 
 	cout << "Best Individual found on iteration "<< result.iteration << endl;
 
