@@ -66,6 +66,7 @@ class Individual{
 	fitness will be calculated after selection/mutation occurs.
 */
 int Individual::calcFitness(vector<vector<int> > clauseFile){
+	this->fitness = 0;
 	bool clauseTrue = false;
 	for(int i = 0; i < clauseFile.size(); i++) {
 
@@ -73,11 +74,13 @@ int Individual::calcFitness(vector<vector<int> > clauseFile){
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 
 			//if any element in the clause is true, then the clause is true
-			if(clauseTrue == false && (clauseFile.at(i).at(j) * this->varAssignmentArray.at(abs(clauseFile.at(i).at(j))-1)) > 0){
+			// cout << "Current Variable = " << clauseFile.at(i).at(j) << " negation Array = " << varAssignmentArray.at(abs(clauseFile.at(i).at(j))-1) << endl;
+			if(clauseTrue == false && ((clauseFile.at(i).at(j) * this->varAssignmentArray.at(abs(clauseFile.at(i).at(j))-1)) > 0 )){
 				this->fitness++;
 				clauseTrue = true;
 			}
 		}
+		clauseTrue = false;
 	}
 	return this->fitness;
 
@@ -164,6 +167,13 @@ vector< vector<int> > readFile(string name){
 */
 bool sortPopulation(const Individual & s1, const Individual & s2){
    return s1.fitness < s2.fitness;
+}
+
+void printBestVector(vector<int> bestVector){
+
+	for(int i = 0; i < bestVector.size(); i++){
+		cout << bestVector.at(i) << endl;
+	}
 }
 
 /*
@@ -494,7 +504,7 @@ fittestFoundIndividual genetic_alg(vector<vector<int> > clauseFile,
 				bestIndividual.bestFitness = population.at(i).fitness;
 				bestIndividual.bestVector = population.at(i).varAssignmentArray;
 				bestIndividual.iteration = genCount;
-				assert(bestIndividual.bestFitness <= numberOfClauses);
+				// assert(bestIndividual.bestFitness <= numberOfClauses);
 				if(bestIndividual.bestFitness == numberOfClauses){
 					return bestIndividual;
 				}
@@ -534,19 +544,18 @@ fittestFoundIndividual genetic_alg(vector<vector<int> > clauseFile,
 
 
 //returns index of worst solution
-Individual findBestSolution(vector<Individual> sampleVector, vector<vector<int> > clauseFile){
+Individual findBestSolution(vector<Individual> &sampleVector, vector<vector<int> > clauseFile){
 
 	int bestFitness = 0;
-	int bestVectorIndex = 0;
+	int bestVectorIndex = -1;
 
 	for(int i = 0; i < sampleVector.size(); i++){
-		sampleVector[i].calcFitness(clauseFile);
+		sampleVector[i].fitness = sampleVector[i].calcFitness(clauseFile);
 		if(sampleVector[i].fitness > bestFitness){
 			bestFitness = sampleVector[i].fitness;
 			bestVectorIndex = i;
 		}
 	}
-	//cout << bestFitness << endl;
 	return sampleVector[bestVectorIndex];
 
 }
@@ -606,12 +615,7 @@ Individual generateSampleVector(vector<double> probVector, int numberOfClauses){
 
 
 
-void printBestVector(vector<int> bestVector){
 
-	for(int i = 0; i < bestVector.size(); i++){
-		cout << bestVector.at(i) << endl;
-	}
-}
 
 fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
  int numIndividuals, int posLearningRate, int negLearningRate, double mutProb,int mutationAmount, int numGen){
@@ -667,11 +671,12 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 		Individual worstInRound;
 
 		//pass data into struct that keeps track of best solutions
+
 		bestInRound = findBestSolution(sampleVector, clauseFile);
 		bestVector = bestInRound.varAssignmentArray;
 
 		if(bestInRound.fitness > bestIndividual.bestFitness){
-			bestIndividual.bestFitness =  bestInRound.fitness;
+			bestIndividual.bestFitness = bestInRound.fitness;
 			bestIndividual.bestVector = bestInRound.varAssignmentArray;
 		}
 
