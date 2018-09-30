@@ -92,7 +92,19 @@ vector< vector<int> > readFile(string name){
 
 	//open file and get rid of first line
 	input.open(name);
+	string comment = "cnf";
 	getline(input, line);
+	for(int i = 0; i < 100; i ++){
+		if(line.find(comment) == string::npos){
+			getline(input, line);
+		}
+		else{
+			cout << line << endl;
+			break;
+		}
+
+	}
+	cout << line << endl;
 	string delimiter = " ";
 	int position;
 	string number;
@@ -721,9 +733,11 @@ int main(int argc, char *argv[]){
 	string alg = string(argv[8]);
 	string filename = argv[1];
 	int numIndividuals = atoi(argv[2]);
+	cout << "he" << endl;
 	clauseFile = readFile(filename);
 
 	if(alg.compare(GENETIC_ALGORITHM) == 0){
+		cout << "in" << endl;
 		string selectionType = argv[3];
 		string crossoverType = argv[4];
 		double crossProb = double(atoi(argv[5]));
