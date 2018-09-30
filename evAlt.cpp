@@ -11,6 +11,7 @@
 #include <assert.h>     /* assert */
 #include <sstream>
 #include <random>
+#include <time.h>
 #include <math.h>
 using namespace std;
 
@@ -160,11 +161,10 @@ bool sortPopulation(const Individual & s1, const Individual & s2){
    return s1.fitness < s2.fitness;
 }
 
-void printBestVector(vector<int> bestVector, int numberOfVariables){
-	numberOfVariables = 1;
+void printBestVector(vector<int> bestVector){
+	cout << "Best Individual Vector Below: " << endl;
 	for(int i = 0; i < bestVector.size(); i++){
-		cout << bestVector.at(i) * numberOfVariables << " ";
-		numberOfVariables ++;
+		cout << i+1 << ":" << bestVector.at(i) << " ";
 	}
 	cout << endl;
 }
@@ -588,9 +588,6 @@ it was found at.
 Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
  int numIndividuals, int posLearningRate, int negLearningRate, double mutProb,int mutationAmount, int numGen){
 
-	//helps us keep track of best individual so far
-
-	//create struct to keep track of bestIndividual
 	Individual bestIndividual;
 	
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -641,8 +638,7 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 			sampleVector.push_back(child);
 		}
 
-
-		//these keep track of the best inidividuals found in the sample vector
+		//keep track of best and worst in sample vector
 		Individual bestInRound;
 		Individual worstInRound;
 		
@@ -658,8 +654,8 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 			bestIndividual.iteration = bestInRound.iteration;
 		}
 
-		//gives us the worst vector from this iteration
-		//also keep track of worst vector.
+
+		//gives us the worst vector from this iteratio
 		worstInRound = findWorstSolution(sampleVector, clauseFile);
 		worstVector = worstInRound.varAssignmentArray;
 
@@ -707,7 +703,8 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 
 
 int main(int argc, char *argv[]){
-
+	clock_t timer;
+	timer = clock();
 	Individual result;
 	vector<vector<int> > clauseFile;
 	string alg = string(argv[8]);
@@ -740,7 +737,10 @@ int main(int argc, char *argv[]){
 
 	}
 
-	//clauseFile = readFile(filename);
+	timer = clock() - timer;
+	timer = ((float)timer)/CLOCKS_PER_SEC;
+	cout << "Algorithm took " << timer << " seconds" << endl;
+
 	double fitnessPercent = (double(result.fitness) / double(numberOfClauses)) * 100;
 
 	cout << "Filename: "<< filename << endl;
@@ -748,8 +748,11 @@ int main(int argc, char *argv[]){
 	cout << "Number of clauses: " << numberOfClauses << endl;
 	cout << "Result Best Fitness: " << result.fitness << endl;
 	cout << "Fitness Percent: " << fitnessPercent << "% " << endl;
+
 	printBestVector(result.varAssignmentArray, numberOfVariables);
+
 	cout << "Best Individual found on iteration "<< result.iteration << endl;
+
 	
 
 }
