@@ -160,11 +160,13 @@ bool sortPopulation(const Individual & s1, const Individual & s2){
    return s1.fitness < s2.fitness;
 }
 
-void printBestVector(vector<int> bestVector){
-
+void printBestVector(vector<int> bestVector, int numberOfVariables){
+	numberOfVariables = 1;
 	for(int i = 0; i < bestVector.size(); i++){
-		cout << bestVector.at(i) << endl;
+		cout << bestVector.at(i) * numberOfVariables << " ";
+		numberOfVariables ++;
 	}
+	cout << endl;
 }
 
 /*
@@ -570,40 +572,19 @@ Individual findWorstSolution(vector<Individual> sampleVector, vector<vector<int>
 }
 
 
-//generates a vector of bools for use in a pbil
-Individual generateSampleVector(vector<double> probVector, int numberOfClauses){
 
-	std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    std::uniform_real_distribution<> dis(0.0, 1.0);
+/*This function takes the parameters taken from the comand line and executes a form of population absed increamental 
+learning. First the function takes the creates a probability vector that is the same size as the nummber of variables
+int eh MAXSAT problem and fills them with the same probability. The function then loops through the and creates a sample
+vector acoording to the values of the probability vector. The best solution is then found for the sample vector. If 
+there is a new best fitness in the sample vector the bestIndividual variable is updated. The function then caclculates the
+changes to the probability vector. The function terminates after it has run the max number of iterations or if it satisfies
+all of the clauses.
+Parameters: clauseFile is a vector that contains the MAXSAT problem, the other values should be self describing.
+Return Value: an Individual that contains the best fitness found. The actual values that satisfy it and the iteration
+it was found at.
 
-    Individual indv;
-    
-	for(int i = 0; i < probVector.size(); i ++){
-
-		//probability for chosing true or false;
-		double probForUse = dis(gen);
-
-
-		//if the porbability is useful than its one
-		if(probForUse <= probVector[i]){
-			//cout << "1" << endl;
-			
-			indv.varAssignmentArray.push_back(1);
-		}
-
-		//if the probability is not than its zero
-		else{
-			//cout << "2" << endl;
-			indv.varAssignmentArray.push_back(0);
-		}
-	}
-	
-	return indv;
-	//initialize the population with random values
-}
-
-
+*/
 Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
  int numIndividuals, int posLearningRate, int negLearningRate, double mutProb,int mutationAmount, int numGen){
 
@@ -611,18 +592,13 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 
 	//create struct to keep track of bestIndividual
 	Individual bestIndividual;
-
-	//best individual from each roun
-
-	Individual child;
 	
 	std::random_device rd;  //Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(0.0, 1.0);
 	
-	//probability vector
+	//probability vector that is used to generate sample populations
 	vector<double> probVector;
-
 
 	//best vector we have found so far
 	vector<int> bestVector;
@@ -638,46 +614,55 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 	vector<Individual> sampleVector;
 	//generation nuymber
 	int generation = 0;
+
+	//while we dont go over the number of asssigned iterations
 	while(generation < numGen){
 
+		//generate a sample vector. Had this in a fuction but was 
+		//worried about values going out of scope.
 		for(int i = 0; i < numIndividuals; i++){
+			//create child for each index of the sample vector
 			Individual child;
 			
 			for(int j = 0; j < numberOfVariables; j++){
 
-			//1 represents true, -1 is false
+				//1 represents true, -1 is false
+
+				//if the probability matches make it true
 				if(dis(gen) <= probVector.at(j)){
 					child.varAssignmentArray.push_back(1);
 				}
 				else {
+					//make it false
 					child.varAssignmentArray.push_back(-1);
 				}
 			}
+			//ggenerate sample vector
 			sampleVector.push_back(child);
 		}
 
 
-
+		//these keep track of the best inidividuals found in the sample vector
 		Individual bestInRound;
 		Individual worstInRound;
-
-		//pass data into struct that keeps track of best solutions
-
+		
+		//copy the best individual
 		bestInRound = findBestSolution(sampleVector, clauseFile);
+		//copy the best vector for use in modifying the probability vector
 		bestVector = bestInRound.varAssignmentArray;
 
+		//if we've found a new best in the function.
 		if(bestInRound.fitness > bestIndividual.fitness){
 			bestIndividual.fitness = bestInRound.fitness;
 			bestIndividual.varAssignmentArray = bestInRound.varAssignmentArray;
 			bestIndividual.iteration = bestInRound.iteration;
 		}
 
-		//gives us the best vector from this iteration
-		//bestVector = bestRound.bestVector;
+		//gives us the worst vector from this iteration
+		//also keep track of worst vector.
 		worstInRound = findWorstSolution(sampleVector, clauseFile);
 		worstVector = worstInRound.varAssignmentArray;
 
-		//keep track of best individual we have found
 
 		//generate positive learning rate 
 		for(int i = 0; i < probVector.size(); i++){
@@ -702,7 +687,7 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 				random = dis(gen);
 
 				//following pseudocode
-				if(random > 0.5){
+				if(dis(gen) > 0.5){
 					mutateDirection = 1;
 				}
 				else{
@@ -763,7 +748,7 @@ int main(int argc, char *argv[]){
 	cout << "Number of clauses: " << numberOfClauses << endl;
 	cout << "Result Best Fitness: " << result.fitness << endl;
 	cout << "Fitness Percent: " << fitnessPercent << "% " << endl;
-	// printBestVector(result.bestVector);
+	printBestVector(result.varAssignmentArray, numberOfVariables);
 	cout << "Best Individual found on iteration "<< result.iteration << endl;
 	
 
