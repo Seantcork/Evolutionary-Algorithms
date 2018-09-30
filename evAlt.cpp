@@ -67,9 +67,11 @@ class Individual{
 */
 int Individual::calcFitness(vector<vector<int> > clauseFile){
 	bool clauseTrue = false;
+	int k = 0;
 	for(int i = 0; i < clauseFile.size(); i++) {
 
 		//checks all elements in a clause
+
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 
 			//if any element in the clause is true, then the clause is true
@@ -490,7 +492,6 @@ fittestFoundIndividual genetic_alg(vector<vector<int> > clauseFile,
 		//evaluate the fitness of each individual, and store if best found individual
 		for(int i = 0; i < numIndividuals; i++) {
 			if(population.at(i).calcFitness(clauseFile) > bestIndividual.bestFitness){
-
 				bestIndividual.bestFitness = population.at(i).fitness;
 				bestIndividual.bestVector = population.at(i).varAssignmentArray;
 				bestIndividual.iteration = genCount;
@@ -531,22 +532,27 @@ fittestFoundIndividual genetic_alg(vector<vector<int> > clauseFile,
 
 }
 
+void printBestVector(vector<int> bestVector){
 
+	for(int i = 0; i < bestVector.size(); i++){
+		cout << bestVector.at(i) <<  " ";
+	}
+}
 
 //returns index of worst solution
 Individual findBestSolution(vector<Individual> sampleVector, vector<vector<int> > clauseFile){
 
 	int bestFitness = 0;
 	int bestVectorIndex = 0;
-
 	for(int i = 0; i < sampleVector.size(); i++){
-		sampleVector[i].calcFitness(clauseFile);
-		if(sampleVector[i].fitness > bestFitness){
-			bestFitness = sampleVector[i].fitness;
+		//printBestVector(sampleVector.at(i).varAssignmentArray);
+		//sampleVector.at(i).calcFitness(clauseFile);
+		//cout << "done printing " << endl;
+		if(sampleVector.at(i).calcFitness(clauseFile) > bestFitness){
+			bestFitness = sampleVector.at(i).fitness;
 			bestVectorIndex = i;
 		}
 	}
-	//cout << bestFitness << endl;
 	return sampleVector[bestVectorIndex];
 
 }
@@ -605,16 +611,8 @@ Individual generateSampleVector(vector<double> probVector, int numberOfClauses){
 }
 
 
-
-void printBestVector(vector<int> bestVector){
-
-	for(int i = 0; i < bestVector.size(); i++){
-		cout << bestVector.at(i) << endl;
-	}
-}
-
 fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
- int numIndividuals, int posLearningRate, int negLearningRate, double mutProb,int mutationAmount, int numGen){
+ int numIndividuals, double posLearningRate, double negLearningRate, double mutProb, double mutationAmount, int numGen){
 
 	//helps us keep track of best individual so far
 
@@ -639,21 +637,23 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 	//the fitness of best vector
 
 	//vector used for sample population
-	vector<Individual> sampleVector;
 	//set normal probabilities
 	for(int i = 0; i < numberOfVariables; i++){
 		probVector.push_back(.5);
 	}
+
+	vector<Individual> sampleVector;
 	//generation nuymber
 	int generation = 0;
 	while(generation < numGen){
 
 		for(int i = 0; i < numIndividuals; i++){
 			Individual child;
+			
 			for(int j = 0; j < numberOfVariables; j++){
 
 			//1 represents true, -1 is false
-				if(dis(gen) <= probVector[j]){
+				if(dis(gen) <= probVector.at(j)){
 					child.varAssignmentArray.push_back(1);
 				}
 				else {
@@ -663,11 +663,14 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 			sampleVector.push_back(child);
 		}
 
+
+
 		Individual bestInRound;
 		Individual worstInRound;
 
 		//pass data into struct that keeps track of best solutions
 		bestInRound = findBestSolution(sampleVector, clauseFile);
+		cout << bestInRound.fitness << endl;
 		bestVector = bestInRound.varAssignmentArray;
 
 		if(bestInRound.fitness > bestIndividual.bestFitness){
@@ -684,13 +687,13 @@ fittestFoundIndividual pbil(vector<vector<int> > clauseFile, int numberOfClauses
 
 		//generate positive learning rate 
 		for(int i = 0; i < probVector.size(); i++){
-			probVector[i] = probVector[i] * (1.0 - posLearningRate) + (bestVector[i] * posLearningRate);
+			probVector[i] = probVector[i] * (1.0 - posLearningRate) + bestVector[i] * posLearningRate;
 
 		}
 		//generate nefatice learning rate
 		for(int i = 0; i < probVector.size(); i++){
-			if(bestVector[i] != worstVector[i]){
-				probVector[i] = probVector[i] * (1.0 - negLearningRate) + (bestVector[i] * negLearningRate);
+			if(bestVector.at(i) != worstVector.at(i)){
+				probVector[i] = probVector[i] * (1.0 - negLearningRate) + bestVector[i] * negLearningRate;
 			}
 		}
 
@@ -736,8 +739,8 @@ int main(int argc, char *argv[]){
 	if(alg.compare(GENETIC_ALGORITHM) == 0){
 		string selectionType = argv[3];
 		string crossoverType = argv[4];
-		double crossProb = atoi(argv[5]);
-		double mutProb = atoi(argv[6]);
+		double crossProb = double(atoi(argv[5]));
+		double mutProb = double(atoi(argv[6]));
 		int numGen = atoi(argv[7]);
 
 		result = genetic_alg(clauseFile, selectionType, crossoverType, numberOfClauses, numIndividuals, crossProb, mutProb, numGen);
@@ -745,11 +748,11 @@ int main(int argc, char *argv[]){
 	}
 
 	if(alg.compare(PBIL) == 0){
-		double posLearningRate = atoi(argv[3]);
-		double negLearningRate = atoi(argv[4]);
-		double mutProb = atoi(argv[5]);
+		double posLearningRate = atof(argv[3]);
+		double negLearningRate = atof(argv[4]);
+		double mutProb = atof(argv[5]);
 
-		double mutationAmount= atoi(argv[6]);
+		double mutationAmount= atof(argv[6]);
 
 		int numGen = atoi(argv[7]);
 
