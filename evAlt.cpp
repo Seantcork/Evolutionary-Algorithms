@@ -330,7 +330,7 @@ vector<Individual> onePointCrossover(vector<Individual> breedingPool, double cro
 	std::mt19937 engine(seeder());
 	//we want to choose a crossover point (that excludes the ends)
 	std::uniform_int_distribution<int> gen(1, numberOfVariables - 1);
-	std::uniform_int_distribution<double> genDouble(0.0, 1.0);
+	std::uniform_real_distribution<double> genDouble(0.0, 1.0);
 
    	Individual firstChild, secondChild;
    	vector<Individual> newPopulation;
@@ -384,7 +384,7 @@ vector<Individual> uniformCrossover(vector<Individual> breedingPool, double cros
 
 	std::random_device seeder;
 	std::mt19937 engine(seeder());
-	std::uniform_int_distribution<double> genDouble(0.0, 1.0);
+	std::uniform_real_distribution<double> genDouble(0.0, 1.0);
 
 	Individual firstChild, secondChild;
    	vector<Individual> newPopulation;
@@ -737,8 +737,8 @@ int main(int argc, char *argv[]){
 		// cout << "in" << endl;
 		string selectionType = argv[3];
 		string crossoverType = argv[4];
-		double crossProb = double(atoi(argv[5]));
-		double mutProb = double(atoi(argv[6]));
+		double crossProb = atof(argv[5]);
+		double mutProb = atof(argv[6]);
 		int numGen = atoi(argv[7]);
 
 		result = genetic_alg(clauseFile, selectionType, crossoverType, numberOfClauses, numIndividuals, crossProb, mutProb, numGen);
