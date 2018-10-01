@@ -21,7 +21,6 @@ const string PBIL = "p";
 const string RANK_SELECTION = "rs";
 const string TOURNAMENT_SELECTION = "ts";
 const int TOURNAMENT_SELECTION_M = 2;
-const int TOURNAMENT_SELECTION_K = 1;
 const string BOLTZMANN_SELECTION = "bs";
 
 const string ONE_POINT_CROSSOVER = "1c";
@@ -58,7 +57,6 @@ class Individual{
 int Individual::calcFitness(vector<vector<int> > clauseFile){
 	this->fitness = 0;
 	bool clauseTrue = false;
-	int k = 0;
 	for(int i = 0; i < clauseFile.size(); i++) {
 
 		//checks all elements in a clause
