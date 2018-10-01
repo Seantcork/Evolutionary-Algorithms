@@ -66,7 +66,6 @@ int Individual::calcFitness(vector<vector<int> > clauseFile){
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 
 			//if any element in the clause is true, then the clause is true
-			// cout << "Current Variable = " << clauseFile.at(i).at(j) << " negation Array = " << varAssignmentArray.at(abs(clauseFile.at(i).at(j))-1) << endl;
 			if(clauseTrue == false && ((clauseFile.at(i).at(j) * this->varAssignmentArray.at(abs(clauseFile.at(i).at(j))-1)) > 0 )){
 				this->fitness++;
 				clauseTrue = true;
@@ -485,7 +484,6 @@ Individual genetic_alg(vector<vector<int> > clauseFile,
 	//keeps track of the best individual found so far
 	Individual bestIndividual;
 
-
 	//loops for the specified number of generations
 	int genCount = 1;
 	while(genCount <= numGen && population.at(0).fitness != numberOfClauses) {
@@ -514,7 +512,6 @@ Individual genetic_alg(vector<vector<int> > clauseFile,
 		else if (selectionType.compare(BOLTZMANN_SELECTION) == 0){
 			population = boltzmannSelection(population, numIndividuals);
 		}
-
 		//does crossover based on user input
 		if(crossoverType.compare(ONE_POINT_CROSSOVER) == 0){
 			population = onePointCrossover(population, crossProb, numIndividuals);
@@ -749,7 +746,7 @@ int main(int argc, char *argv[]){
 	cout << "Result Best Fitness: " << result.fitness << endl;
 	cout << "Fitness Percent: " << fitnessPercent << "% " << endl;
 
-	printBestVector(result.varAssignmentArray, numberOfVariables);
+	printBestVector(result.varAssignmentArray);
 
 	cout << "Best Individual found on iteration "<< result.iteration << endl;
 
