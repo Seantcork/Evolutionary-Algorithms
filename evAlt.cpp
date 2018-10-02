@@ -123,7 +123,7 @@ vector< vector<int> > readFile(string name){
 
 	//check to see if the file is actually open
 	if(! input.is_open()){
-		cout << "errror opening file" << endl;
+		cout << "error opening file" << endl;
         return clauseFile;
 	}
 
@@ -619,7 +619,7 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 	int generation = 0;
 
 	//while we dont go over the number of asssigned iterations
-	while(generation < numGen){
+	while(generation < numGen || bestIndividual.fitness != numberOfClauses){
 
 		//generate a sample vector. Had this in a fuction but was 
 		//worried about values going out of scope.
@@ -674,7 +674,7 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 			probVector[i] = probVector[i] * (1.0 - posLearningRate) + bestVector[i] * posLearningRate;
 
 		}
-		//generate nefatice learning rate
+		//generate negative learning rate
 		for(int i = 0; i < probVector.size(); i++){
 			if(probVector[i] >=1 || probVector[i] <= 0){
 				continue;
@@ -684,7 +684,7 @@ Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
 			}
 		}
 
-		//mutation during pnil
+		//mutation during pbil
 		int mutateDirection;
 		for(int i = 0; i < probVector.size(); i++){
 			//gen random
@@ -722,11 +722,9 @@ int main(int argc, char *argv[]){
 	string alg = string(argv[8]);
 	string filename = argv[1];
 	int numIndividuals = atoi(argv[2]);
-	// cout << "he" << endl;
 	clauseFile = readFile(filename);
 
 	if(alg.compare(GENETIC_ALGORITHM) == 0){
-		// cout << "in" << endl;
 		string selectionType = argv[3];
 		string crossoverType = argv[4];
 		double crossProb = atof(argv[5]);
