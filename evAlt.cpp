@@ -57,10 +57,9 @@ class Individual{
 int Individual::calcFitness(vector<vector<int> > clauseFile){
 	this->fitness = 0;
 	bool clauseTrue = false;
+	// For each clause in the clauseFile
 	for(int i = 0; i < clauseFile.size(); i++) {
-
-		//checks all elements in a clause
-
+		// Check all the elements in a clause
 		for(int j = 0; j < clauseFile.at(i).size(); j++){
 
 			//if any element in the clause is true, then the clause is true
