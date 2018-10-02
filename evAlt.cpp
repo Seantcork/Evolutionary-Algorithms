@@ -1,4 +1,4 @@
-//included all essentials I think
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -75,7 +75,8 @@ int Individual::calcFitness(vector<vector<int> > clauseFile){
 
 }
 
-//probably need to talk about this data structure to make sure we are doing this right
+//reads the MAXSAT problem into a vector vecotor of ints that 
+//represent the problem
 vector< vector<int> > readFile(string name){
 
 	//Data structure used to keep track of the whole fike
@@ -96,12 +97,10 @@ vector< vector<int> > readFile(string name){
 			getline(input, line);
 		}
 		else{
-			cout << line << endl;
 			break;
 		}
 
 	}
-	cout << line << endl;
 	string delimiter = " ";
 	int position;
 	string number;
@@ -595,10 +594,6 @@ it was found at.
 Individual pbil(vector<vector<int> > clauseFile, int numberOfClauses,
  int numIndividuals, double posLearningRate, double negLearningRate, double mutProb, double mutationAmount, int numGen){
 
- 	cout << posLearningRate << endl;
- 	cout << negLearningRate << endl;
- 	cout << mutProb << endl;
- 	cout << mutationAmount << endl;
 
 	Individual bestIndividual;
 	
